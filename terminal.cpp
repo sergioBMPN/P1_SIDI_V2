@@ -85,7 +85,7 @@ void Terminal::cd(comando_t * comm)
 	Nodo* nodo;
 	vector<Nodo*>* path = new vector<Nodo*>;
 	Nodo* pwd = arbol->get_pwd()->back();
-	vector<Nodo*> pwd_actual;
+	vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 	// comandos especiales 1
 	if (!strncmp(comm->argumentos->at(0), "/", 1))
 	{
@@ -95,12 +95,12 @@ void Terminal::cd(comando_t * comm)
 	// comandos especiales 2
 	else if (!strncmp(comm->argumentos->at(0), "..",2)) {
 		
-		path=arbol->get_pwd();
-		for (int i = 0; i < path->size()-1; i++)
-			pwd_actual.push_back(path->at(i));
+		pwd_actual =arbol->get_pwd();
+		for (int i = 0; i < pwd_actual->size()-1; i++)
+			path->push_back(pwd_actual->at(i));
 
-		if (pwd_actual.size() > 0)
-			end = arbol->move_to(&pwd_actual);
+		if (path->size() > 0)
+			end = 1;
 		else
 			end = 2;
 	}
@@ -113,7 +113,9 @@ void Terminal::cd(comando_t * comm)
 
 		if (nodo != NULL) {
 			if (nodo->get_id() != 0)// si el primero no es root tengo que comprobar que sea hijo del pwd
-				path->push_back(arbol->get_pwd()->back());
+				for (int i = 0; i < arbol->get_pwd()->size(); i++)
+					path->push_back(arbol->get_pwd()->at(i));
+			
 			path->push_back(nodo);
 
 			while (end == 0)
@@ -244,16 +246,16 @@ void Terminal::rm(comando_t * comm)
 
 void Terminal::ls()
 {
-	Nodo* pwd = arbol->get_pwd()->back();
-	vector<Nodo*>* hijos = pwd->get_hijos();
+	Nodo* nodo = arbol->get_pwd()->back();
+	vector<Nodo*>* hijos = nodo->get_hijos();
 	if (hijos != NULL)
 	{
 		for (int i = 0; i < hijos->size(); i++) {
-
-			//if(hijos->at(i))
-			//cout << <<hijos->at(i)->get_nombre()<< <<"\t";
+			nodo = hijos->at(i);
+			const time_t t = nodo->get_lastMod();
+			if (nodo->get_type())
+				cout << "d- " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " <<  asctime(gmtime(&t));
 		}
-		cout << endl;
 	}
 }
 

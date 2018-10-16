@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
+#include <ctime>
+
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 #define CMD_CD 0
