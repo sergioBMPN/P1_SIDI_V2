@@ -62,5 +62,4 @@ void Nodo::add_hijo(Nodo* hijo){
 	if (this->hijos == NULL)
 		hijos = new vector<Nodo*>;
 	this->hijos->push_back(hijo);
-		//insert(this->hijos->end(),hijos);
 }

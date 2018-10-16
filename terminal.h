@@ -12,6 +12,7 @@
 #define CMD_EXIT 2
 #define CMD_PWD 3
 #define CMD_LS 4
+#define CMD_RMDIR 5
 
 using namespace std;
 
@@ -24,9 +25,12 @@ typedef struct comando_t
 
 class Terminal
 {
-    const char* comandos[3]={
+    const char* comandos[6]={
         "cd",
         "mkdir",
+		"pwd",
+		"rmdir",
+		"ls",
         "exit"
     };
 public:
@@ -43,6 +47,7 @@ public:
 	void pwd();
 	void rmdir(comando_t* comm);
 	void rm(comando_t* comm);
+	void ls();
 	void shut_down();
 
 	//visual
