@@ -17,7 +17,7 @@ void Terminal::run()
 		free(comando.argumentos);
     }
 }
-
+//leer y ejecutar comm
 void Terminal::leer_comando(comando_t *comando){
 
     char* line=new char [1024];
@@ -80,6 +80,35 @@ int Terminal::get_tipo_comm(char* comando){
         return -1;
 }
 
+void Terminal::ejecutar_comando(comando_t *comando){
+
+    switch(comando->tipo){
+        case CMD_CD:
+			cd(comando);
+            break;
+        case CMD_MKDIR:
+			mkdir(comando);
+            break;
+		case CMD_PWD:
+			pwd();
+			break;
+		case CMD_RMDIR:
+			rmdir(comando);
+			break;
+		case CMD_LS:
+			ls();
+			break;
+        case CMD_EXIT:
+			shut_down();
+            break;
+        default:
+            printf("Commando not found\n");
+            break;
+    }
+}
+
+//
+
 void Terminal::cd(comando_t * comm)
 {
 	int end = 0;
@@ -93,13 +122,13 @@ void Terminal::cd(comando_t * comm)
 	if (!strncmp(comm->argumentos->at(0), "/", 1))
 	{
 		path->push_back(arbol->get_root());
-		end=arbol->move_to(path);
+		end = arbol->move_to(path);
 	}
 	// comandos especiales 2
-	else if (!strncmp(comm->argumentos->at(0), "..",2)) {
-		
-		pwd_actual =arbol->get_pwd();
-		for (int i = 0; i < pwd_actual->size()-1; i++)
+	else if (!strncmp(comm->argumentos->at(0), "..", 2)) {
+
+		pwd_actual = arbol->get_pwd();
+		for (int i = 0; i < pwd_actual->size() - 1; i++)
 			path->push_back(pwd_actual->at(i));
 
 		if (path->size() > 0)
@@ -111,14 +140,12 @@ void Terminal::cd(comando_t * comm)
 	else {
 		token = strtok(comm->argumentos->at(0), split);
 		nodo = arbol->get_nodo(token);
-		// si la ruta empieza por root
-
 
 		if (nodo != NULL) {
 			if (nodo->get_id() != 0)// si el primero no es root tengo que comprobar que sea hijo del pwd
-				for (int i = 0; i < arbol->get_pwd()->size(); i++)
+				for (int i = 0; i < arbol->get_pwd()->size(); i++)//añadimos toda la ruta hasta el nodo actual
 					path->push_back(arbol->get_pwd()->at(i));
-			
+
 			path->push_back(nodo);
 
 			while (end == 0)
@@ -139,11 +166,11 @@ void Terminal::cd(comando_t * comm)
 	}
 
 	//cambiar el pwd
-	if (end == 1) 
+	if (end == 1)
 		end = arbol->move_to(path);
 
-	if(end<1)
-		cout<<"La ruta indicada no es un directorio o no existe: "<< comm->argumentos->at(0) <<"\n";
+	if (end<1)
+		cout << "La ruta indicada no es un directorio o no existe: " << comm->argumentos->at(0) << "\n";
 }
 
 void Terminal::mkdir(comando_t * comm)
@@ -155,15 +182,15 @@ void Terminal::mkdir(comando_t * comm)
 	Nodo* last_nodo;
 
 	//encontrar argumento en lista nodos
-		//separar path
-		//buscar los nodos
+	//separar path
+	//buscar los nodos
 	//cout << comm->argumentos->at(0) << endl;
 	token = strtok(comm->argumentos->at(0), split);
 	nodo = arbol->get_nodo(token);
 	//cout << token << endl;
 	if (nodo != NULL)
 	{
-		while (token != NULL )//&& nodo != NULL)
+		while (token != NULL)//&& nodo != NULL)
 		{
 			token = strtok(NULL, split);
 			//cout << token << endl;
@@ -173,7 +200,7 @@ void Terminal::mkdir(comando_t * comm)
 				last_token = string(token);
 			}
 			else if (token == NULL && nodo == NULL)
-				arbol->add_child(last_nodo, last_token,true);
+				arbol->add_child(last_nodo, last_token, true);
 			else
 				cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
 		}
@@ -194,7 +221,13 @@ void Terminal::mkdir(comando_t * comm)
 
 void Terminal::pwd()
 {
-	arbol->pwd_tostring();
+	vector<Nodo*>*ruta=arbol->get_pwd();
+
+	for (int i = 0; i < ruta->size(); i++) {
+		cout << ruta->at(i)->get_nombre();
+		if (!(i == ruta->size() - 1))
+			cout << "/";
+	}
 	cout << endl;
 }
 
@@ -226,15 +259,15 @@ void Terminal::rmdir(comando_t * comm)
 			}
 			else if (token == NULL && nodo != NULL) //cuando ya es el ultimo de la sentencia (el nodo a borrar)
 			{
-				arbol->delete_child(last_nodo->get_padre(),last_nodo);
+				arbol->delete_child(last_nodo->get_padre(), last_nodo);
 			}
-				
+
 			else
 				cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
 		}
 	}
 	else {
-			cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+		cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
 	}
 }
 
@@ -252,7 +285,7 @@ void Terminal::ls()
 			nodo = hijos->at(i);
 			const time_t t = nodo->get_lastMod();
 			if (nodo->get_type())
-				cout << "d- " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " <<  asctime(gmtime(&t));
+				cout << "d- " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " << asctime(gmtime(&t));
 		}
 	}
 }
@@ -265,33 +298,9 @@ void Terminal::shut_down()
 	exit(0);
 }
 
-void Terminal::ejecutar_comando(comando_t *comando){
 
-    switch(comando->tipo){
-        case CMD_CD:
-			cd(comando);
-            break;
-        case CMD_MKDIR:
-			mkdir(comando);
-            break;
-		case CMD_PWD:
-			pwd();
-			break;
-		case CMD_RMDIR:
-			rmdir(comando);
-			break;
-		case CMD_LS:
-			ls();
-			break;
-        case CMD_EXIT:
-			shut_down();
-            break;
-        default:
-            printf("Commando not found\n");
-            break;
-    }
-}
 
+//visuales
 void Terminal::pintar_terminal() {
 
 	cout << "sergioBMPN@SI_DI:";
