@@ -42,11 +42,11 @@ void Terminal::leer_comando(comando_t *comando){
 			//subdividir arg
 			while (token != NULL) {
 				token = strtok(NULL, split);
-				comando->argumentos->push_back(token);
+				if (token != NULL)
+					comando->argumentos->push_back(token);
 				//cout << token << endl;
 			}
 		}
-		cout << comando->argumentos->at(0) << endl;
 	}
 }
 
@@ -79,29 +79,65 @@ int Terminal::get_tipo_comm(char* comando){
 
 void Terminal::cd(comando_t * comm)
 {
-	
+	int end = 0;
 	char split[2] = "/";
 	char* token;
 	Nodo* nodo;
 	vector<Nodo*>* path = new vector<Nodo*>;
+	Nodo* pwd = arbol->get_pwd()->back();
 
-	//encontrar argumento en lista nodos
-		//separar path
-		//buscar los nodos
-	token = strtok(comm->argumentos->at(0), split);
-	nodo=arbol->get_nodo(token);
-	path->push_back(nodo);
-	while (token != NULL) {
-		token = strtok(NULL, split);
-		if (token != NULL)
-		{
-			nodo = arbol->get_nodo(token);
-			path->push_back(nodo);
-		}
+	// comandos especiales 1
+	if (!strncmp(comm->argumentos->at(0), "/", 1))
+	{
+		path->push_back(arbol->get_root());
+		arbol->move_to(path);
 	}
-	
+	// comandos especiales 2
+	else if (!strncmp(comm->argumentos->at(0), "..",2)) {
+		path=arbol->get_pwd();
+		path->pop_back();
+		if (path->size() > 0)
+			end = arbol->move_to(path);
+		else
+			end = 2;
+	}
+	//caso normal
+	else {
+		token = strtok(comm->argumentos->at(0), split);
+		nodo = arbol->get_nodo(token);
+		// si la ruta empieza por root
+
+
+		if (nodo != NULL) {
+			if (nodo->get_id() != 0)// si el primero no es root tengo que comprobar que sea hijo del pwd
+				path->push_back(arbol->get_pwd()->back());
+			path->push_back(nodo);
+
+			while (end == 0)
+			{
+				token = strtok(NULL, split);
+				if (token != NULL)
+				{
+					nodo = arbol->get_nodo(token);
+					if (nodo != NULL)
+						path->push_back(nodo);
+					else
+						end = -1;
+				}
+				else
+					end = 1;
+
+			}
+			
+		}
+		
+	}
+
 	//cambiar el pwd
-	if(arbol->move_to(path) == 0)
+	if (end == 1) 
+		end = arbol->move_to(path);
+
+	if(end<1)
 		cout<<"La ruta indicada no es un directorio o no existe: "<< comm->argumentos->at(0) <<"\n";
 }
 
@@ -114,8 +150,8 @@ void Terminal::mkdir(comando_t * comm)
 	Nodo* last_nodo;
 
 	//encontrar argumento en lista nodos
-	//separar path
-	//buscar los nodos
+		//separar path
+		//buscar los nodos
 	//cout << comm->argumentos->at(0) << endl;
 	token = strtok(comm->argumentos->at(0), split);
 	nodo = arbol->get_nodo(token);
@@ -137,9 +173,17 @@ void Terminal::mkdir(comando_t * comm)
 				cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
 		}
 	}
-	else 
-		cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
-
+	else {
+		last_token = token;
+		token = strtok(NULL, split);
+		if (token == NULL)
+		{
+			last_nodo = arbol->get_pwd()->back();
+			arbol->add_child(last_nodo, last_token, true);
+		}
+		else
+			cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+	}
 
 }
 
