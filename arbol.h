@@ -27,7 +27,7 @@ public:
     bool is_dir(vector<Nodo*>* dir);
     Nodo* find_child(Nodo* padre, string hijo);
     int update_child(Nodo* nodo,string nombre, time_t date,off_t tam);
-    int delete_child(Nodo* nodo);
+    int delete_child(Nodo* padre,Nodo* nodo);
 
     Nodo* get_root();
 	vector<Nodo*>* get_pwd();

@@ -105,21 +105,21 @@
 
  }
 
- int Arbol::delete_child(Nodo* nodo)
+ int Arbol::delete_child(Nodo* padre ,Nodo* hijo)
  {
-     if(nodo->get_hijos()!=NULL)
-        return 0;
+	 vector<Nodo*> *hijos = padre->get_hijos();
+	 int id_borrar=-1;
+	 //if (find_child(padre, hijo->get_nombre()) != NULL)
+	 if (hijos != NULL)
+		 for (int i = 0; i < hijos->size(); i++)
+			 if (hijos->at(i)->get_id() == hijo->get_id())
+				 id_borrar = i;
+	 if (id_borrar != -1)
+		 hijos->erase(hijos->begin() + id_borrar);
 
-     int pos=-1;
-     for(int i=0;i<listaNodos->size();i++)
-        if(listaNodos->at(i)->get_id()==nodo->get_id())
-            pos=i;
-     if(pos<0)
-         return 0;
-
-     listaNodos->erase(listaNodos->begin()+pos);
-     return 1;
+	 return id_borrar;
  }
+
 
  Nodo * Arbol::get_root()
  {
@@ -133,10 +133,15 @@
 
  Nodo * Arbol::get_nodo(string nombre)
  {
-	 if(!nombre.empty())
-		 for (int i = 0; i<listaNodos->size(); i++)
-			 if (listaNodos->at(i)->get_nombre() == nombre)			 
-				 return listaNodos->at(i);
+	 if (nombre.compare("root") == 0)
+		 return root;
+
+	 Nodo* nodo_activo = get_pwd()->back();	 
+	 vector<Nodo*>*hijos = nodo_activo->get_hijos();
+	 if(hijos!=NULL)
+		 for (int i = 0; i<nodo_activo->get_hijos()->size(); i++)
+			 if (hijos->at(i)->get_nombre() == nombre)		//buscar en hijos	 
+				 return hijos->at(i);
 
 	 return NULL;
  }

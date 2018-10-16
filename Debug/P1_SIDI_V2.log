@@ -1,6 +1,7 @@
-﻿  terminal.cpp
-c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\terminal.cpp(57): warning C4018: '<': no coinciden signed/unsigned
-c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\terminal.cpp(99): warning C4018: '<': no coinciden signed/unsigned
-c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\terminal.cpp(116): warning C4018: '<': no coinciden signed/unsigned
-c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\terminal.cpp(253): warning C4018: '<': no coinciden signed/unsigned
+﻿  arbol.cpp
+c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\arbol.cpp(47): warning C4018: '<': no coinciden signed/unsigned
+c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\arbol.cpp(79): warning C4018: '<': no coinciden signed/unsigned
+c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\arbol.cpp(114): warning C4018: '<': no coinciden signed/unsigned
+c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\arbol.cpp(142): warning C4018: '<': no coinciden signed/unsigned
+c:\users\sergio\source\repos\p1_sidi_v2\p1_sidi_v2\arbol.cpp(152): warning C4018: '<': no coinciden signed/unsigned
   P1_SIDI_V2.vcxproj -> C:\Users\Sergio\source\repos\P1_SIDI_V2\Debug\P1_SIDI_V2.exe

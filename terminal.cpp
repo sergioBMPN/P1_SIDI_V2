@@ -63,6 +63,9 @@ int Terminal::get_tipo_comm(char* comando){
             if(!strncmp("mkdir", comando, 5) && strlen(comando) == 5){
                 return CMD_MKDIR;
             }
+			if (!strncmp("rmdir", comando, 5) && strlen(comando) == 5) {
+				return CMD_RMDIR;
+			}
 			if (!strncmp("pwd", comando, 3) && strlen(comando) == 3) {
 				return CMD_PWD;
 			}
@@ -209,6 +212,7 @@ void Terminal::rmdir(comando_t * comm)
 	//cout << comm->argumentos->at(0) << endl;
 	token = strtok(comm->argumentos->at(0), split);
 	nodo = arbol->get_nodo(token);
+	last_nodo = nodo;
 	//cout << token << endl;
 	if (nodo != NULL)
 	{
@@ -219,23 +223,17 @@ void Terminal::rmdir(comando_t * comm)
 			if (token != NULL) {
 				last_nodo = nodo;
 				nodo = arbol->find_child(nodo, token);
-				last_token = string(token);
 			}
-			else if (token == NULL && nodo == NULL)
-				arbol->add_child(last_nodo, last_token, true);
+			else if (token == NULL && nodo != NULL) //cuando ya es el ultimo de la sentencia (el nodo a borrar)
+			{
+				arbol->delete_child(last_nodo->get_padre(),last_nodo);
+			}
+				
 			else
 				cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
 		}
 	}
 	else {
-		last_token = token;
-		token = strtok(NULL, split);
-		if (token == NULL)
-		{
-			last_nodo = arbol->get_pwd()->back();
-			arbol->add_child(last_nodo, last_token, true);
-		}
-		else
 			cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
 	}
 }
