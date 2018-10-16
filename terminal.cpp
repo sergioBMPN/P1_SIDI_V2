@@ -85,19 +85,22 @@ void Terminal::cd(comando_t * comm)
 	Nodo* nodo;
 	vector<Nodo*>* path = new vector<Nodo*>;
 	Nodo* pwd = arbol->get_pwd()->back();
-
+	vector<Nodo*> pwd_actual;
 	// comandos especiales 1
 	if (!strncmp(comm->argumentos->at(0), "/", 1))
 	{
 		path->push_back(arbol->get_root());
-		arbol->move_to(path);
+		end=arbol->move_to(path);
 	}
 	// comandos especiales 2
 	else if (!strncmp(comm->argumentos->at(0), "..",2)) {
+		
 		path=arbol->get_pwd();
-		path->pop_back();
-		if (path->size() > 0)
-			end = arbol->move_to(path);
+		for (int i = 0; i < path->size()-1; i++)
+			pwd_actual.push_back(path->at(i));
+
+		if (pwd_actual.size() > 0)
+			end = arbol->move_to(&pwd_actual);
 		else
 			end = 2;
 	}
