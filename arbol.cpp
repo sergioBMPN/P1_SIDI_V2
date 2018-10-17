@@ -109,13 +109,16 @@
  {
 	 vector<Nodo*> *hijos = padre->get_hijos();
 	 int id_borrar=-1;
-	 //if (find_child(padre, hijo->get_nombre()) != NULL)
+	 
 	 if (hijos != NULL)
 		 for (int i = 0; i < hijos->size(); i++)
 			 if (hijos->at(i)->get_id() == hijo->get_id())
 				 id_borrar = i;
 	 if (id_borrar != -1)
+	 {
 		 hijos->erase(hijos->begin() + id_borrar);
+		 listaNodos->erase(listaNodos->begin() + hijo->get_id());
+	 }
 
 	 return id_borrar;
  }

@@ -60,6 +60,9 @@ int Terminal::get_tipo_comm(char* comando){
 			if(!strncmp("cd", comando, 2) && strlen(comando) == 2){
                 return CMD_CD;
             }
+			if (!strncmp("rm", comando, 2) && strlen(comando) == 2) {
+				return CMD_RM;
+			}
             if(!strncmp("mkdir", comando, 5) && strlen(comando) == 5){
                 return CMD_MKDIR;
             }
@@ -95,6 +98,9 @@ void Terminal::ejecutar_comando(comando_t *comando){
 		case CMD_RMDIR:
 			rmdir(comando);
 			break;
+		case CMD_RM:
+			rm(comando);
+			break;
 		case CMD_LS:
 			ls();
 			break;
@@ -107,7 +113,7 @@ void Terminal::ejecutar_comando(comando_t *comando){
     }
 }
 
-//
+//comandos
 
 void Terminal::cd(comando_t * comm)
 {
@@ -259,7 +265,12 @@ void Terminal::rmdir(comando_t * comm)
 			}
 			else if (token == NULL && nodo != NULL) //cuando ya es el ultimo de la sentencia (el nodo a borrar)
 			{
-				arbol->delete_child(last_nodo->get_padre(), last_nodo);
+				if (!last_nodo->get_type())
+					cout << "Error " << last_nodo->get_nombre() << " es un archivo, para eliminarlo utilice rm <directorio>" << endl;
+				else if(last_nodo->get_hijos()!=NULL)
+					cout << "Error " << last_nodo->get_nombre() << " no esta vacio" << endl;
+				else
+					arbol->delete_child(last_nodo->get_padre(), last_nodo);
 			}
 
 			else
@@ -273,21 +284,68 @@ void Terminal::rmdir(comando_t * comm)
 
 void Terminal::rm(comando_t * comm)
 {
+	char split[2] = "/";
+	char* token;
+	Nodo* nodo;
+	string last_token;
+	Nodo* last_nodo;
+
+	//encontrar argumento en lista nodos
+	//separar path
+	//buscar los nodos
+	//cout << comm->argumentos->at(0) << endl;
+	token = strtok(comm->argumentos->at(0), split);
+	nodo = arbol->get_nodo(token);
+	last_nodo = nodo;
+	//cout << token << endl;
+	if (nodo != NULL)
+	{
+		while (token != NULL)//&& nodo != NULL)
+		{
+			token = strtok(NULL, split);
+			//cout << token << endl;
+			if (token != NULL) {
+				last_nodo = nodo;
+				nodo = arbol->find_child(nodo, token);
+			}
+			else if (token == NULL && nodo != NULL) //cuando ya es el ultimo de la sentencia (el nodo a borrar)
+			{
+				if (last_nodo->get_type())
+					cout << "Error " << last_nodo->get_nombre() << " es un directorio, para eliminarlo utilice rmdir <directorio>" << endl;
+				else
+					arbol->delete_child(last_nodo->get_padre(), last_nodo);
+			}
+
+			else
+				cout << "Error 1.0 la ruta no es un archivo o no existe" << endl;
+		}
+	}
+	else {
+		cout << "Error 1.2 la ruta no es un archivo o no existe" << endl;
+	}
 }
 
 void Terminal::ls()
 {
 	Nodo* nodo = arbol->get_pwd()->back();
 	vector<Nodo*>* hijos = nodo->get_hijos();
+	int tam_total = 0;
 	if (hijos != NULL)
 	{
 		for (int i = 0; i < hijos->size(); i++) {
 			nodo = hijos->at(i);
 			const time_t t = nodo->get_lastMod();
 			if (nodo->get_type())
-				cout << "d- " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " << asctime(gmtime(&t));
+				cout << "DIR " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " << asctime(gmtime(&t));
+			tam_total = (int)nodo->get_tam();
 		}
+		cout << hijos->size() <<" elemento(s) en directorio remoto " << nodo->get_nombre() << " ocupando un total de " << tam_total <<" bytes " << endl;
 	}
+}
+
+void Terminal::upload(comando_t * comm)
+{
+
 }
 
 void Terminal::shut_down()

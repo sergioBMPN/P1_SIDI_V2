@@ -59,7 +59,9 @@ void Nodo::set_lastMod(time_t date){
 
 //otras
 void Nodo::add_hijo(Nodo* hijo){
+	//TODO añadoir al padre el tamaño de cada hijo (RECURSIVO)
 	if (this->hijos == NULL)
 		hijos = new vector<Nodo*>;
 	this->hijos->push_back(hijo);
+	this->set_tam(this->get_tam() + hijo->get_tam());
 }
