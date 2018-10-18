@@ -1,4 +1,4 @@
-#include "terminal.h"
+﻿#include "terminal.h"
 
 Terminal::Terminal()
 {
@@ -149,7 +149,7 @@ void Terminal::cd(comando_t * comm)
 
 		if (nodo != NULL) {
 			if (nodo->get_id() != 0)// si el primero no es root tengo que comprobar que sea hijo del pwd
-				for (int i = 0; i < arbol->get_pwd()->size(); i++)//a�adimos toda la ruta hasta el nodo actual
+				for (int i = 0; i < arbol->get_pwd()->size(); i++)//añadimos toda la ruta hasta el nodo actual
 					path->push_back(arbol->get_pwd()->at(i));
 
 			path->push_back(nodo);
@@ -354,6 +354,10 @@ void Terminal::shut_down()
 	//salvar datos
 	getchar();
 	exit(0);
+}
+
+void Terminal::lpwd()
+{
 }
 
 

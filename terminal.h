@@ -1,14 +1,18 @@
 #ifndef TERMINAL_H
-#define TERMINAL_H
+
 #include "arbol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
 #include <ctime>
+#include <direct.h>
+
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
+
+#define TERMINAL_H
 #define CMD_CD 0
 #define CMD_MKDIR 1
 #define CMD_EXIT 2
@@ -54,6 +58,7 @@ public:
 	void ls();
 	void upload(comando_t* comm);
 	void shut_down();
+	void lpwd();
 
 	//visual
 	void pintar_terminal();
