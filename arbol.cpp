@@ -13,14 +13,24 @@
 	pwd->insert(pwd->begin(),root);
  }
 
- void Arbol::add_child(Nodo* padre,string new_nombre,bool dir)
+ void Arbol::add_dir(Nodo* padre,string new_nombre)
  {
     time_t t=time(0);
     last_id++;
-    Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,dir,4096,t);
+    Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,true,4096,t);
 
     padre->add_hijo(n_nodo);
     listaNodos->push_back(n_nodo);
+ }
+
+ void Arbol::add_file(Nodo* padre,string new_nombre,off_t size)
+ {
+     time_t t=time(0);
+     last_id++;
+     Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,false,size,t);
+
+     padre->add_hijo(n_nodo);
+     listaNodos->push_back(n_nodo);
  }
 
  int Arbol::move_to(vector<Nodo*>* dir)
@@ -141,10 +151,11 @@
 
 	 Nodo* nodo_activo = get_pwd()->back();	 
 	 vector<Nodo*>*hijos = nodo_activo->get_hijos();
+     //cout << hijos->size()<<endl;
 	 if(hijos!=NULL)
 		 for (int i = 0; i<nodo_activo->get_hijos()->size(); i++)
-			 if (hijos->at(i)->get_nombre() == nombre)		//buscar en hijos	 
-				 return hijos->at(i);
+             if (hijos->at(i)->get_nombre().compare(nombre)==0)		//buscar en hijos
+                 return hijos->at(i);
 
 	 return NULL;
  }

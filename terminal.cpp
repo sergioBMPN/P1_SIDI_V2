@@ -12,13 +12,13 @@ void Terminal::run()
     while(!exit){
 		comando.argumentos = new vector<char*>();
 		pintar_terminal();
-        leer_comando(&comando);
-        ejecutar_comando(&comando);
+        if(leer_comando(&comando)==0)
+            ejecutar_comando(&comando);
 		free(comando.argumentos);
     }
 }
 //leer y ejecutar comm
-void Terminal::leer_comando(comando_t *comando){
+int Terminal::leer_comando(comando_t *comando){
 
     char* line=new char [1024];
     char split[2]=" ";
@@ -44,10 +44,16 @@ void Terminal::leer_comando(comando_t *comando){
 				token = strtok(NULL, split);
 				if (token != NULL)
 					comando->argumentos->push_back(token);
-				//cout << token << endl;
+                //cout << token << endl;
 			}
 		}
+        if(comando->argumentos->size()==0){
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            return -1;
+        }
+        return 0;
 	}
+    return -1;
 }
 
 int Terminal::get_tipo_comm(char* comando){
@@ -57,8 +63,14 @@ int Terminal::get_tipo_comm(char* comando){
 			for (int i = 0; i < strlen(comando); i++)
 				comando[i] = tolower(comando[i]);
 
+            if(!strncmp("cp", comando, 2) && strlen(comando) == 2){
+                return CMD_CP;
+            }
 			if(!strncmp("cd", comando, 2) && strlen(comando) == 2){
                 return CMD_CD;
+            }
+            if(!strncmp("mv", comando, 2) && strlen(comando) == 2){
+                return CMD_MV;
             }
 			if (!strncmp("rm", comando, 2) && strlen(comando) == 2) {
 				return CMD_RM;
@@ -75,6 +87,18 @@ int Terminal::get_tipo_comm(char* comando){
 			if (!strncmp("ls", comando, 2) && strlen(comando) == 2) {
 				return CMD_LS;
 			}
+            if (!strncmp("lls", comando, 3) && strlen(comando) == 3) {
+                return CMD_LLS;
+            }
+            if (!strncmp("lpwd", comando, 4) && strlen(comando) == 4) {
+                return CMD_LPWD;
+            }
+            if (!strncmp("lcd", comando, 3) && strlen(comando) == 3) {
+                return CMD_LCD;
+            }
+            if (!strncmp("upload", comando, 6) && strlen(comando) == 6) {
+                return CMD_UPL;
+            }
             if(!strncmp("exit", comando, 4) && strlen(comando) == 4){
                 return CMD_EXIT;
             }
@@ -88,6 +112,12 @@ void Terminal::ejecutar_comando(comando_t *comando){
     switch(comando->tipo){
         case CMD_CD:
 			cd(comando);
+            break;
+        case CMD_CP:
+            cp(comando);
+            break;
+        case CMD_MV:
+            mv(comando);
             break;
         case CMD_MKDIR:
 			mkdir(comando);
@@ -104,6 +134,18 @@ void Terminal::ejecutar_comando(comando_t *comando){
 		case CMD_LS:
 			ls();
 			break;
+        case CMD_LPWD:
+            lpwd();
+            break;
+        case CMD_LLS:
+            lls();
+            break;
+        case CMD_LCD:
+            lcd(comando);
+            break;
+        case CMD_UPL:
+            upload(comando);
+            break;
         case CMD_EXIT:
 			shut_down();
             break;
@@ -122,6 +164,8 @@ void Terminal::cd(comando_t * comm)
 	char* token;
 	Nodo* nodo;
 	vector<Nodo*>* path = new vector<Nodo*>;
+    cout<<"aa";
+
 	Nodo* pwd = arbol->get_pwd()->back();
 	vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 	// comandos especiales 1
@@ -181,47 +225,50 @@ void Terminal::cd(comando_t * comm)
 
 void Terminal::mkdir(comando_t * comm)
 {
-	char split[2] = "/";
-	char* token;
-	Nodo* nodo;
-	string last_token;
-	Nodo* last_nodo;
+    char split[2] = "/";
+    char* token;
+    Nodo* nodo;
+    string last_token;
+    Nodo* last_nodo;
 
-	//encontrar argumento en lista nodos
-	//separar path
-	//buscar los nodos
-	//cout << comm->argumentos->at(0) << endl;
-	token = strtok(comm->argumentos->at(0), split);
-	nodo = arbol->get_nodo(token);
-	//cout << token << endl;
-	if (nodo != NULL)
-	{
-		while (token != NULL)//&& nodo != NULL)
-		{
-			token = strtok(NULL, split);
-			//cout << token << endl;
-			if (token != NULL) {
-				last_nodo = nodo;
-				nodo = arbol->find_child(nodo, token);
-				last_token = string(token);
-			}
-			else if (token == NULL && nodo == NULL)
-				arbol->add_child(last_nodo, last_token, true);
-			else
-				cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
-		}
-	}
-	else {
-		last_token = token;
-		token = strtok(NULL, split);
-		if (token == NULL)
-		{
-			last_nodo = arbol->get_pwd()->back();
-			arbol->add_child(last_nodo, last_token, true);
-		}
-		else
-			cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
-	}
+    //encontrar argumento en lista nodos
+    //separar path
+    //buscar los nodos
+    //cout << comm->argumentos->at(0) << endl;
+    token = strtok(comm->argumentos->at(0), split);
+    nodo = arbol->get_nodo(token);
+    //cout << token << endl;
+    if (nodo != NULL)
+    {
+        while (token != NULL)//&& nodo != NULL)
+        {
+            token = strtok(NULL, split);
+            //cout << token << endl;
+            if (token != NULL) {
+                last_nodo = nodo;
+                nodo = arbol->find_child(nodo, token);
+                last_token = string(token);
+            }
+            else if (token == NULL && nodo == NULL){
+                if(arbol->find_child(last_nodo, last_token)==NULL)// si no tenemos un hijo con ese mismo nombre
+                    arbol->add_dir(last_nodo, last_token);
+            }
+            else
+                cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
+        }
+    }
+    else {
+        last_token = token;
+        token = strtok(NULL, split);
+        if (token == NULL)
+        {
+            last_nodo = arbol->get_pwd()->back();
+            if(arbol->find_child(last_nodo, last_token)==NULL)
+                arbol->add_dir(last_nodo, last_token);
+        }
+        else
+            cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+    }
 
 }
 
@@ -336,15 +383,43 @@ void Terminal::ls()
 			nodo = hijos->at(i);
 			const time_t t = nodo->get_lastMod();
 			if (nodo->get_type())
-				cout << "DIR " << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " << asctime(gmtime(&t));
-			tam_total = (int)nodo->get_tam();
+                cout << "DIR ";
+            else
+                cout << "- ";
+            cout << nodo->get_nombre() << " " << (int)nodo->get_tam() << " " << asctime(gmtime(&t));
 		}
-		cout << hijos->size() <<" elemento(s) en directorio remoto " << nodo->get_nombre() << " ocupando un total de " << tam_total <<" bytes " << endl;
 	}
 }
 
 void Terminal::upload(comando_t * comm)
 {
+    struct dirent **namelist;
+    struct stat attrb;
+    int size=scandir(".",&namelist,NULL,alphasort);
+    int find=0;
+    char* name = comm->argumentos->at(0);
+    for(int i=size-1;i>=0;i--){
+        if(!strcmp(namelist[i]->d_name,name))
+        {
+            find=1;
+            stat(name,&attrb);
+            Nodo* padre= arbol->get_pwd()->back();
+            if(arbol->find_child(padre, name)==NULL){
+                arbol->add_file(padre,(string)name,(intmax_t)attrb.st_size);
+                cout <<"El archivo " <<name<<" se ha subido correctamente"<<endl;
+            }
+            else
+            {
+                cout <<"El archivo " <<name<<" ya existe"<<endl;
+                find=2;
+            }
+            break;
+        }
+        free(namelist[i]);
+    }
+    free(namelist);
+    if(find==0)
+        cout <<"Ha habido un error subiendo el archivo "<<name<<endl;
 
 }
 
@@ -358,9 +433,167 @@ void Terminal::shut_down()
 
 void Terminal::lpwd()
 {
+    char path[PATH_MAX];
+    if(getcwd(path,sizeof(path))!=NULL)
+        cout << path << endl;
 }
 
+void Terminal::lls()
+{
+    struct dirent **namelist;
+    struct stat attrb;
+    int size=scandir(".",&namelist,NULL,alphasort);
 
+    for(int i=0;i<size;i++) {
+        char* name=namelist[i]->d_name;
+
+       stat(name,&attrb);
+
+        if(namelist[i]->d_type==DT_DIR)
+            cout <<"DIR ";
+        else
+            cout <<"- ";
+        cout << name <<"\t"<<(intmax_t)attrb.st_size<<"\t"<<ctime(&attrb.st_mtime);
+
+    }
+    /*
+    while (size--) {
+        free(namelist[size]);
+    }*/
+    free(namelist);
+
+}
+
+void Terminal::lcd(comando_t* comm)
+{
+   string dir=comm->argumentos->at(0);
+   if(chdir(dir.c_str())==-1)
+      cout << "Se ha producido un error"<< endl;
+}
+
+void Terminal::mv(comando_t* comm)
+{
+    char split[2] = "/";
+    char* token;
+    Nodo* nodo;
+    string last_token;
+    Nodo* last_nodo;
+
+    token = strtok(comm->argumentos->at(0), split);
+    nodo = arbol->get_nodo(token);
+    last_nodo=nodo;
+
+    if (nodo != NULL)
+    {
+        while (token != NULL)
+        {
+            token = strtok(NULL, split);
+            if (token != NULL) {
+                last_nodo = nodo;
+                nodo = arbol->find_child(nodo, token);
+                last_token = string(token);
+            }
+            else if (token == NULL && nodo!= NULL)
+            {
+                if(comm->argumentos->at(1) !=NULL)
+                    last_nodo->set_name(comm->argumentos->at(1));
+                else
+                    cout << "Error de sentencia el segundo arg es NULL" << endl;
+            }
+            else
+                cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
+        }
+    }
+    else
+        cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+
+
+
+}
+
+void Terminal::cp(comando_t* comm)
+{
+    char split[2] = "/";
+    char* token;
+    Nodo* nodo;
+    string last_token;
+    Nodo* last_nodo1, *last_nodo2;
+    int correcto=2;
+
+    /***SACAMOS EL ARG1***/
+    token = strtok(comm->argumentos->at(0), split);
+    nodo = arbol->get_nodo(token);
+    last_nodo1=nodo;
+
+    if (nodo != NULL)
+    {
+        while (token != NULL)
+        {
+            token = strtok(NULL, split);
+            if (token != NULL) {
+                last_nodo1 = nodo;
+                nodo = arbol->find_child(nodo, token);
+                last_token = string(token);
+            }
+            else if (nodo== NULL){
+                correcto--;
+                cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
+            }
+        }
+    }
+    else{
+        correcto--;
+        cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+    }
+
+    /***SACAMOS EL ARG2***/
+    token = strtok(comm->argumentos->at(1), split);
+    nodo = arbol->get_nodo(token);
+    last_nodo2=nodo;
+
+    if (nodo != NULL && correcto==2)
+    {
+        while (token != NULL)
+        {
+            token = strtok(NULL, split);
+            if (token != NULL) {
+                last_nodo2 = nodo;
+                nodo = arbol->find_child(nodo, token);
+                last_token = string(token);
+            }
+            else if (nodo== NULL){
+                correcto--;
+                cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
+            }
+        }
+    }
+    else{
+        correcto--;
+        cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
+    }
+
+    if(correcto==2)
+    {
+        //FILE-> DIR
+        if(!last_nodo1->get_type() && last_nodo2->get_type())
+        {
+            last_nodo2->add_hijo(last_nodo1);
+        }
+        //FILE->FILE
+        else if(!last_nodo1->get_type() && !last_nodo2->get_type())
+        {
+            last_nodo2=last_nodo1;
+        }
+        //DIR->DIR
+        else if(last_nodo1->get_type() && last_nodo2->get_type()){
+            vector<Nodo*> *hijos =last_nodo1->get_hijos();
+            for(int i=0;i<hijos->size();i++)
+                last_nodo2->add_hijo(hijos->at(i));
+        }
+
+    }
+
+}
 
 //visuales
 void Terminal::pintar_terminal() {

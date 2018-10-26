@@ -16,3 +16,7 @@ all: $(OBJS)
 %.o:%.cpp
 	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
 #para cada fichero.o busca su equivalente .cpp // -c para no linkar //$< = %.cpp //  $@ = %.o
+
+clean:
+	rm *.o	
+	rm $(EXEC)

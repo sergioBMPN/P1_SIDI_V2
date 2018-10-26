@@ -1,6 +1,6 @@
 #ifndef ARBOL_H
 #define ARBOL_H
-#include <string>
+#include <string.h>
 #include "nodo.h"
 #include<iostream>
 #include <vector>
@@ -22,12 +22,14 @@ class Arbol
 
 public:
     Arbol();
-    void add_child(Nodo* padre,string new_nombre,bool dir);
+    void add_dir(Nodo* padre,string new_nombre);
+    void add_file(Nodo* padre,string new_nombre,off_t size);
     int move_to(vector<Nodo*>* dir);
     bool is_dir(vector<Nodo*>* dir);
     Nodo* find_child(Nodo* padre, string hijo);
     int update_child(Nodo* nodo,string nombre, time_t date,off_t tam);
     int delete_child(Nodo* padre,Nodo* nodo);
+
 
     Nodo* get_root();
 	vector<Nodo*>* get_pwd();

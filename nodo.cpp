@@ -19,6 +19,8 @@ string Nodo::get_nombre(){
     return this->nombre;
 }
 vector<Nodo*>*Nodo::get_hijos(){
+    if(this->hijos ==NULL)
+        return NULL;
     return this->hijos;
 }
 int Nodo::get_id(){
