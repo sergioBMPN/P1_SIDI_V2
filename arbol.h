@@ -22,8 +22,8 @@ class Arbol
 
 public:
     Arbol();
-    void add_dir(Nodo* padre,string new_nombre);
-    void add_file(Nodo* padre,string new_nombre,off_t size);
+    Nodo* add_dir(Nodo* padre,string new_nombre,vector<Nodo*>* hijos);
+    Nodo* add_file(Nodo* padre,string new_nombre,off_t size);
     int move_to(vector<Nodo*>* dir);
     bool is_dir(vector<Nodo*>* dir);
     Nodo* find_child(Nodo* padre, string hijo);

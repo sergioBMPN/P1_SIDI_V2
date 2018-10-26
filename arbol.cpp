@@ -13,17 +13,18 @@
 	pwd->insert(pwd->begin(),root);
  }
 
- void Arbol::add_dir(Nodo* padre,string new_nombre)
+ Nodo* Arbol::add_dir(Nodo* padre,string new_nombre,vector<Nodo*>* hijos)
  {
     time_t t=time(0);
     last_id++;
-    Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,true,4096,t);
+    Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,hijos,true,4096,t);
 
     padre->add_hijo(n_nodo);
     listaNodos->push_back(n_nodo);
+    return n_nodo;
  }
 
- void Arbol::add_file(Nodo* padre,string new_nombre,off_t size)
+ Nodo* Arbol::add_file(Nodo* padre,string new_nombre,off_t size)
  {
      time_t t=time(0);
      last_id++;
@@ -31,6 +32,8 @@
 
      padre->add_hijo(n_nodo);
      listaNodos->push_back(n_nodo);
+     return n_nodo;
+
  }
 
  int Arbol::move_to(vector<Nodo*>* dir)

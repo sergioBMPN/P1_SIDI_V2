@@ -44,13 +44,8 @@ int Terminal::leer_comando(comando_t *comando){
 				token = strtok(NULL, split);
 				if (token != NULL)
 					comando->argumentos->push_back(token);
-                //cout << token << endl;
-			}
+            }
 		}
-        if(comando->argumentos->size()==0){
-            cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            return -1;
-        }
         return 0;
 	}
     return -1;
@@ -111,25 +106,43 @@ void Terminal::ejecutar_comando(comando_t *comando){
 
     switch(comando->tipo){
         case CMD_CD:
-			cd(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                cd(comando);
             break;
         case CMD_CP:
-            cp(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                cp(comando);
             break;
         case CMD_MV:
-            mv(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                mv(comando);
             break;
         case CMD_MKDIR:
-			mkdir(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                mkdir(comando);
             break;
 		case CMD_PWD:
 			pwd();
 			break;
 		case CMD_RMDIR:
-			rmdir(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                rmdir(comando);
 			break;
 		case CMD_RM:
-			rm(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                rm(comando);
 			break;
 		case CMD_LS:
 			ls();
@@ -141,10 +154,16 @@ void Terminal::ejecutar_comando(comando_t *comando){
             lls();
             break;
         case CMD_LCD:
-            lcd(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                lcd(comando);
             break;
         case CMD_UPL:
-            upload(comando);
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                upload(comando);
             break;
         case CMD_EXIT:
 			shut_down();
@@ -155,6 +174,7 @@ void Terminal::ejecutar_comando(comando_t *comando){
     }
 }
 
+
 //comandos
 
 void Terminal::cd(comando_t * comm)
@@ -164,8 +184,7 @@ void Terminal::cd(comando_t * comm)
 	char* token;
 	Nodo* nodo;
 	vector<Nodo*>* path = new vector<Nodo*>;
-    cout<<"aa";
-
+   
 	Nodo* pwd = arbol->get_pwd()->back();
 	vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 	// comandos especiales 1
@@ -234,16 +253,16 @@ void Terminal::mkdir(comando_t * comm)
     //encontrar argumento en lista nodos
     //separar path
     //buscar los nodos
-    //cout << comm->argumentos->at(0) << endl;
+
     token = strtok(comm->argumentos->at(0), split);
     nodo = arbol->get_nodo(token);
-    //cout << token << endl;
+
     if (nodo != NULL)
     {
         while (token != NULL)//&& nodo != NULL)
         {
             token = strtok(NULL, split);
-            //cout << token << endl;
+
             if (token != NULL) {
                 last_nodo = nodo;
                 nodo = arbol->find_child(nodo, token);
@@ -251,7 +270,7 @@ void Terminal::mkdir(comando_t * comm)
             }
             else if (token == NULL && nodo == NULL){
                 if(arbol->find_child(last_nodo, last_token)==NULL)// si no tenemos un hijo con ese mismo nombre
-                    arbol->add_dir(last_nodo, last_token);
+                    arbol->add_dir(last_nodo, last_token,NULL);
             }
             else
                 cout << "Error 1.0 la ruta no es un directorio o no existe" << endl;
@@ -264,7 +283,7 @@ void Terminal::mkdir(comando_t * comm)
         {
             last_nodo = arbol->get_pwd()->back();
             if(arbol->find_child(last_nodo, last_token)==NULL)
-                arbol->add_dir(last_nodo, last_token);
+                arbol->add_dir(last_nodo, last_token,NULL);
         }
         else
             cout << "Error 1.2 la ruta no es un directorio o no existe" << endl;
@@ -295,18 +314,18 @@ void Terminal::rmdir(comando_t * comm)
 	//encontrar argumento en lista nodos
 	//separar path
 	//buscar los nodos
-	//cout << comm->argumentos->at(0) << endl;
+
 	token = strtok(comm->argumentos->at(0), split);
 	nodo = arbol->get_nodo(token);
 	last_nodo = nodo;
-	//cout << token << endl;
-	if (nodo != NULL)
+
+    if (nodo != NULL)
 	{
 		while (token != NULL)//&& nodo != NULL)
 		{
 			token = strtok(NULL, split);
-			//cout << token << endl;
-			if (token != NULL) {
+
+            if (token != NULL) {
 				last_nodo = nodo;
 				nodo = arbol->find_child(nodo, token);
 			}
@@ -340,18 +359,18 @@ void Terminal::rm(comando_t * comm)
 	//encontrar argumento en lista nodos
 	//separar path
 	//buscar los nodos
-	//cout << comm->argumentos->at(0) << endl;
-	token = strtok(comm->argumentos->at(0), split);
+
+    token = strtok(comm->argumentos->at(0), split);
 	nodo = arbol->get_nodo(token);
 	last_nodo = nodo;
-	//cout << token << endl;
-	if (nodo != NULL)
+
+    if (nodo != NULL)
 	{
 		while (token != NULL)//&& nodo != NULL)
 		{
 			token = strtok(NULL, split);
-			//cout << token << endl;
-			if (token != NULL) {
+
+            if (token != NULL) {
 				last_nodo = nodo;
 				nodo = arbol->find_child(nodo, token);
 			}
@@ -405,7 +424,34 @@ void Terminal::upload(comando_t * comm)
             stat(name,&attrb);
             Nodo* padre= arbol->get_pwd()->back();
             if(arbol->find_child(padre, name)==NULL){
-                arbol->add_file(padre,(string)name,(intmax_t)attrb.st_size);
+                if(namelist[i]->d_type==DT_DIR){// si es un directorio añado sus hijos ademas
+
+                    struct dirent **hijos;
+                    struct stat hijos_att;
+
+                    int tam=scandir(name,&hijos,NULL,alphasort);
+                    padre=arbol->add_dir(padre,(string)name,NULL);
+
+                    for(int j=0;j<tam;j++) {
+                        char* nombre=hijos[j]->d_name;
+                        stat(nombre,&hijos_att);
+                        if(strcmp(nombre,".") && strcmp(nombre,"..")){
+                            if(hijos[j]->d_type==DT_DIR  )// si un hijo es un directorio
+                            {
+                                comando_t command;
+                                command.argumentos = new vector<char*>();
+                                command.argumentos->push_back(nombre);
+                                arbol->add_dir(padre,(string)nombre,NULL);
+                                //lcd()
+                                //upload(&command);
+                            }
+                            else
+                                arbol->add_file(padre,(string)nombre,(intmax_t)hijos_att.st_size);
+                        }
+                    }
+                }
+                else
+                    arbol->add_file(padre,(string)name,(intmax_t)attrb.st_size);
                 cout <<"El archivo " <<name<<" se ha subido correctamente"<<endl;
             }
             else
@@ -582,7 +628,10 @@ void Terminal::cp(comando_t* comm)
         //FILE->FILE
         else if(!last_nodo1->get_type() && !last_nodo2->get_type())
         {
-            last_nodo2=last_nodo1;
+            time_t t = time(0);
+            last_nodo2->set_tam(last_nodo1->get_tam());
+            last_nodo2->set_lastMod(t);
+            last_nodo2->set_name(last_nodo1->get_nombre());
         }
         //DIR->DIR
         else if(last_nodo1->get_type() && last_nodo2->get_type()){
