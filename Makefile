@@ -4,7 +4,7 @@
 CC=g++
 #optimizaciones
 #CFLAGS=-DDEBUG -O3 #-D (pasar variables) -O[0,1,2,3](optimizacion)
-CFLAGS=-g -DDEBUG -std=c++11
+CFLAGS=-g -DDEBUG -std=c++11 -fopenmp
 LDLIBS=
 INCLUDE=-I. -I./include
 EXEC=practica1

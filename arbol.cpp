@@ -1,23 +1,28 @@
 #include "arbol.h"
 
- Arbol::Arbol()
+
+ Arbol::Arbol(bool first_init=true)
  {
-    time_t t = time(0);
-	//cout << asctime(gmtime(&t)) << endl;
-    root = new Nodo(this,0,0,"Root",NULL,NULL,true,4096,t);
     listaNodos = new vector<Nodo*>();
 	pwd = new vector<Nodo*>();
-
-    listaNodos->insert(listaNodos->begin(),root);
     last_id=0;
-	pwd->insert(pwd->begin(),root);
+    mod=false;
+
+    if(first_init)
+    {
+        time_t t = time(0);
+        root = new Nodo(this,0,0,"Root",NULL,NULL,true,4096,t);
+        listaNodos->push_back(root);
+        pwd->push_back(root);
+    }
  }
 
  Nodo* Arbol::add_dir(Nodo* padre,string new_nombre,vector<Nodo*>* hijos)
  {
     time_t t=time(0);
     last_id++;
-    Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,hijos,true,4096,t);
+    int level=(padre->get_nivel()+1);
+    Nodo *n_nodo= new Nodo(this,last_id,level,new_nombre,padre,hijos,true,4096,t);
 
     padre->add_hijo(n_nodo);
     listaNodos->push_back(n_nodo);
@@ -136,7 +141,6 @@
 	 return id_borrar;
  }
 
-
  Nodo * Arbol::get_root()
  {
 	 return this->root;
@@ -165,7 +169,7 @@
 
  void Arbol::pwd_tostring()
  {
-	 vector<Nodo*>* nodos = get_pwd();
+     vector<Nodo*>* nodos = get_pwd();
 	 for (int i = 0; i < nodos->size(); i++) {
 		 if (nodos->at(i)->get_id() == 0)
 			 cout << "~";
@@ -177,5 +181,180 @@
 
  }
 
+ void Arbol::save_arbol(){
+     string file="arbol.dat";
+     Nodo* nodo;
+     Nodo* padre;
+     vector<Nodo*>* hijos;
+     string line;
+
+     remove(file.c_str());
+     ofstream f(file.c_str(),ios::app | ios::binary);
+
+     line = to_string(last_id);
+     line+=",";
+     line = to_string(listaNodos->size());
+     line += "\n";
+     f.write(line.c_str(),line.size());
+
+    for(int i=0;i<listaNodos->size();i++)
+    {
+        nodo=listaNodos->at(i);
+        padre=nodo->get_padre();
+        hijos=nodo->get_hijos();
+
+        line = to_string(nodo->get_id());
+        line+=",";
+        line+=to_string(nodo->get_nivel());
+        line+=",";
+        line+=nodo->get_nombre();
+        line+=",";
+        if(padre!=NULL)
+            line+=to_string(padre->get_id());
+        else
+            line+="-1";
+        line+=",(";
+        if(hijos!=NULL) {
+            for(int j=0;j<hijos->size();j++)
+            {
+                if(j>0)
+                    line+="/";
+                line+=to_string(nodo->get_hijos()->at(j)->get_id());
+            }
+        }
+        line+="),";
+        line+=to_string(nodo->get_type());
+        line+=",";
+        line+=to_string(nodo->get_tam());
+        line+=",";
+        line+=to_string(nodo->get_lastMod());
+        line+="\n";
+        //cout<<line.length()<< " "<<line.size()<<endl;
+
+        f.write(line.c_str(),line.size());
+     }
+     f.close();
+ }
+
+int Arbol::load_arbol()
+{
+    //añadir comprobacion del tamaño del arbol
+    string file="arbol.dat";
+    string line;
+    ifstream f(file.c_str());
+    vector<string>* vectorHijos= new vector<string>;
+    int result=-1;
+    try{
+        if(f.is_open())
+        {
+            vector<string>* line_info;
+            getline(f,line);
+            line_info = get_elements(line,",");
+            last_id = atoi(line_info->at(0).c_str());
+            int numNodos = atoi(line_info->at(1).c_str());
+
+
+            while(getline(f,line))
+            {
+                //variables de nodo
+                Nodo *newNodo;
+                int  id,nivel;
+                string nombre;
+                Nodo* padre;
+                bool dir;
+                off_t tam;
+                time_t date;
+
+
+                //coger elemento linea
+                line_info = get_elements(line,",");
+                //id
+                id = atoi(line_info->at(0).c_str());
+                //nivel
+                nivel = atoi(line_info->at(1).c_str());
+                //nombre
+                nombre = line_info->at(2);
+                //padre
+                int idPadre=atoi(line_info->at(3).c_str());
+                if(idPadre ==-1)
+                    padre=NULL;
+                else
+                    padre=listaNodos->at(idPadre);
+
+                //hijos
+                    // poner a null y buscar despues;
+                vectorHijos->push_back(line_info->at(4));
+                //is_dir
+                if( atoi(line_info->at(5).c_str())==0)
+                    dir=false;
+                else
+                    dir=true;
+                //tamano
+                tam= atoi(line_info->at(6).c_str());
+                //fecha
+                date= atoi(line_info->at(7).c_str());
+
+                newNodo= new Nodo(this,id,nivel,nombre,padre,NULL,dir,tam,date);
+                listaNodos->push_back(newNodo);
+                if(id==0)
+                {
+                    pwd->push_back(newNodo);
+                    root=newNodo;
+                }
+                if(padre!=NULL)
+                {
+                    padre->add_hijo(newNodo);
+                }
+
+            }
+            if(numNodos==listaNodos->size())
+                result=1;
+            for(int i=0;i<listaNodos->size();i++){
+                if(listaNodos->at(i)->get_padre()==NULL && listaNodos->at(i)->get_id()!=0)
+                    result=-1;
+            }
+        }
+    }
+    catch(int e)
+    {
+        cout<<"ha sudedido un error "<< e<<endl;
+    }
+    return result;
+
+}
+
+vector<string>* Arbol::get_elements(string line,string split)
+{
+     vector<string>* out = new vector<string>();
+
+     char * c_line = new char[line.size() + 1];
+     std::copy(line.begin(), line.end(), c_line);
+     c_line[line.size()] = '\0';
+
+     char *token = (strtok(c_line, split.c_str()));
+     if(token != NULL)
+     {
+         out->push_back(string(token));
+         while (token != NULL) {
+             token = (strtok(NULL, split.c_str()));
+             if (token != NULL)
+                 out->push_back(string(token));
+         }
+     }
+     return out;
+
+}
+
+bool Arbol::is_mod()
+{
+#pragma omp flush(mod)
+    return mod;
+}
+
+void Arbol::set_mod(bool mod)
+{
+    this->mod=mod;
+#pragma omp flush(mod)
+}
 
 

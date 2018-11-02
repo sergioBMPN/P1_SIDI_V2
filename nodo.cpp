@@ -4,6 +4,7 @@ Nodo::Nodo(Arbol *arbol,int id, int nivel, string nombre, Nodo* padre, vector<No
 {
     this->arbol=arbol;
     this->id = id;
+    this->nivel=nivel;
     this->nombre= nombre;
     this->padre=padre;
     this->hijos = hijos;
@@ -12,7 +13,7 @@ Nodo::Nodo(Arbol *arbol,int id, int nivel, string nombre, Nodo* padre, vector<No
     this->ultima_mod=date;
 }
 
-Nodo* Nodo::get_padre(){
+Nodo* Nodo::get_padre(){ 
     return this->padre;
 }
 string Nodo::get_nombre(){

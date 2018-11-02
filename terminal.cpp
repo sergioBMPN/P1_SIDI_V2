@@ -2,19 +2,64 @@
 
 Terminal::Terminal()
 {
-    arbol=new Arbol();
+    struct dirent **namelist;
+
+    int size=scandir(".",&namelist,NULL,alphasort);
+    int find=0;
+    for(int i=0;i<size;i++) {
+        char* name=namelist[i]->d_name;
+        //si existe
+        if(!strncmp("arbol.dat",name,9))
+        {
+            find=1;
+            break;
+        }
+    }
+    if(find)// si lo encuentra
+    {
+        printf("Cargando sistema de ficheros\n");
+        arbol=new Arbol(false);
+        if(arbol->load_arbol()==-1)
+        {
+            cout<< "no se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
+            exit(-1);
+        }
+    }
+    else
+        arbol=new Arbol(true);
+
 }
 
 void Terminal::run()
 {
     bool exit=false;
     comando_t comando;
-    while(!exit){
-		comando.argumentos = new vector<char*>();
-		pintar_terminal();
-        if(leer_comando(&comando)==0)
-            ejecutar_comando(&comando);
-		free(comando.argumentos);
+#pragma omp parallel for num_threads(2)
+    for(int i=0;i<2;i++){
+        if(omp_get_thread_num()==0)
+        {
+            while(!exit){
+                comando.argumentos = new vector<char*>();
+                pintar_terminal();
+                 if(leer_comando(&comando)==0)
+                    ejecutar_comando(&comando);
+                free(comando.argumentos);
+            }
+        }
+        else
+        {
+            while(!exit){
+                usleep(10000*20);
+                //cout << "mod"<<endl;
+                //guardar el arbol
+
+                if(arbol->is_mod()){
+                    //cout << "mod"<<endl;
+                    arbol->save_arbol();
+                    arbol->set_mod(false);
+                }
+            }
+        }
     }
 }
 //leer y ejecutar comm
@@ -244,6 +289,7 @@ void Terminal::cd(comando_t * comm)
 
 void Terminal::mkdir(comando_t * comm)
 {
+    arbol->set_mod(true);
     char split[2] = "/";
     char* token;
     Nodo* nodo;
@@ -305,6 +351,7 @@ void Terminal::pwd()
 
 void Terminal::rmdir(comando_t * comm)
 {
+    arbol->set_mod(true);
 	char split[2] = "/";
 	char* token;
 	Nodo* nodo;
@@ -350,6 +397,7 @@ void Terminal::rmdir(comando_t * comm)
 
 void Terminal::rm(comando_t * comm)
 {
+    arbol->set_mod(true);
 	char split[2] = "/";
 	char* token;
 	Nodo* nodo;
@@ -412,6 +460,7 @@ void Terminal::ls()
 
 void Terminal::upload(comando_t * comm)
 {
+    arbol->set_mod(true);
     struct dirent **namelist;
     struct stat attrb;
     int size=scandir(".",&namelist,NULL,alphasort);
@@ -472,8 +521,11 @@ void Terminal::upload(comando_t * comm)
 void Terminal::shut_down()
 {
 	printf("Closing file system\n");
+
 	//salvar datos
-	getchar();
+    if(arbol->is_mod())
+        arbol->save_arbol();
+
 	exit(0);
 }
 
@@ -519,6 +571,7 @@ void Terminal::lcd(comando_t* comm)
 
 void Terminal::mv(comando_t* comm)
 {
+    arbol->set_mod(true);
     char split[2] = "/";
     char* token;
     Nodo* nodo;
@@ -559,6 +612,7 @@ void Terminal::mv(comando_t* comm)
 
 void Terminal::cp(comando_t* comm)
 {
+    arbol->set_mod(true);
     char split[2] = "/";
     char* token;
     Nodo* nodo;
@@ -623,6 +677,7 @@ void Terminal::cp(comando_t* comm)
         //FILE-> DIR
         if(!last_nodo1->get_type() && last_nodo2->get_type())
         {
+            //TODO: Duda hay que crear uno nuevo con la info del anterior?
             last_nodo2->add_hijo(last_nodo1);
         }
         //FILE->FILE

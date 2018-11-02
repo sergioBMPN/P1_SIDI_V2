@@ -1,4 +1,4 @@
-#ifndef TERMINAL_H
+#pragma once
 
 #include "arbol.h"
 #include <stdio.h>
@@ -9,13 +9,14 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
+#include <omp.h>
+#include <fstream>
 
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 
-#define TERMINAL_H
+
 #define CMD_CD 0
 #define CMD_MKDIR 1
 #define CMD_EXIT 2
@@ -55,6 +56,7 @@ class Terminal
         "cp",
         "exit"
     };
+
 public:
     Arbol *arbol;
     Terminal();
@@ -81,10 +83,9 @@ public:
 	//visual
 	void pintar_terminal();
 };
-#endif // TERMINAL_H
+
 
 
 //TODO:
-	//añadir nuevos comandos a lista
-	//actualizar get_tipo_comando
-	//actualizar ejecutar_comm 
+    //pruebas eliminar nodo y guardar comprobar last id?
+
