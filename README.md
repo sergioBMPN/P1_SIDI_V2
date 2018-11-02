@@ -2,6 +2,7 @@
 
 ## Descripcion
   Este es un proyecto desarrollado para la asignatura Sistemas Distribuidos (4ºIDCD, U-TAD) Esta práctica consiste en simular una terminal de Linux en la que se pueda crear directorios, cargar ficheros desde la maquina local y aceder a ellos.
+  En la version 2.0 se ha incluido un metodo para guardar el arbol y cargarlo al iniciar el programa y un sistema de auto guardado
 
 ## Comandos
 - ls : Lista los hijos del directorio actual
@@ -18,4 +19,4 @@
 - upload : Permite subir un archivo o directorio ya existente en local 
 
 ## Version
-  V 1.2
+  V 2.0
