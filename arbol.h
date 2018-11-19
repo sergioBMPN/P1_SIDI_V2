@@ -22,11 +22,11 @@ class Arbol
    Nodo* root;
    vector<Nodo*>* pwd;
    bool recursive_dir(vector<Nodo*>* dir,vector<Nodo*>* hijos);
-   vector<string>* get_elements(string line,string split);
 
 public:
     Arbol(bool first_init);
     Nodo* add_dir(Nodo* padre,string new_nombre,vector<Nodo*>* hijos);
+    Nodo* add_recursive_dir(Nodo* org,Nodo* dest);
     Nodo* add_file(Nodo* padre,string new_nombre,off_t size);
     int move_to(vector<Nodo*>* dir);
     bool is_dir(vector<Nodo*>* dir);
@@ -35,6 +35,7 @@ public:
     int delete_child(Nodo* padre,Nodo* nodo);
     void save_arbol();
     int load_arbol();
+    vector<string>* get_elements(string line,string split);
 
     Nodo* get_root();
 	vector<Nodo*>* get_pwd();

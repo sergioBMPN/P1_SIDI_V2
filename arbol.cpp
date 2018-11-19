@@ -29,6 +29,32 @@
     return n_nodo;
  }
 
+ Nodo* Arbol::add_recursive_dir(Nodo* org,Nodo* dest)
+ {
+    if(org->get_type() && dest->get_type())//deben ser dos dir
+    {
+        if(org->get_hijos()!=NULL)
+        {
+            Nodo* n_nodo, *nodo;
+            for(int i=0;i<org->get_hijos()->size();i++)
+            {
+                nodo =org->get_hijos()->at(i);
+                if(nodo->get_type())// si es un directorio
+                {
+                    //creamos el nuevo nodo
+                    n_nodo=add_dir(dest,nodo->get_nombre(),NULL);
+
+                    //recusive
+                    add_recursive_dir(nodo,n_nodo);
+                }
+                else //si es un archivo
+                    n_nodo= add_file(dest,nodo->get_nombre(),nodo->get_tam());
+            }
+        }
+        return dest;
+    }
+ }
+
  Nodo* Arbol::add_file(Nodo* padre,string new_nombre,off_t size)
  {
      time_t t=time(0);
@@ -193,7 +219,7 @@
 
      line = to_string(last_id);
      line+=",";
-     line = to_string(listaNodos->size());
+     line += to_string(listaNodos->size());
      line += "\n";
      f.write(line.c_str(),line.size());
 
