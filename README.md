@@ -19,4 +19,4 @@
 - upload : Permite subir un archivo o directorio ya existente en local 
 
 ## Version
-  V 2.0
+  V 2.1
