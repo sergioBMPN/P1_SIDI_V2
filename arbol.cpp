@@ -11,7 +11,7 @@
     if(first_init)
     {
         time_t t = time(0);
-        root = new Nodo(this,0,0,"Root",NULL,NULL,true,4096,t);
+        root = new Nodo(this,0,0,"Root",NULL,NULL,true,4096,t,NULL);
         listaNodos->push_back(root);
         pwd->push_back(root);
     }
@@ -22,7 +22,7 @@
     time_t t=time(0);
     last_id++;
     int level=(padre->get_nivel()+1);
-    Nodo *n_nodo= new Nodo(this,last_id,level,new_nombre,padre,hijos,true,4096,t);
+    Nodo *n_nodo= new Nodo(this,last_id,level,new_nombre,padre,hijos,true,4096,t,NULL);
 
     padre->add_hijo(n_nodo);
     listaNodos->push_back(n_nodo);
@@ -59,7 +59,7 @@
  {
      time_t t=time(0);
      last_id++;
-     Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,false,size,t);
+     Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,false,size,t,NULL);
 
      padre->add_hijo(n_nodo);
      listaNodos->push_back(n_nodo);
@@ -254,6 +254,16 @@
         line+=to_string(nodo->get_tam());
         line+=",";
         line+=to_string(nodo->get_lastMod());
+        line+=",(";
+        if(nodo->get_blocks()!=NULL) {
+            for(int i=0;i<nodo->get_blocks()->size();i++)
+            {
+                if(i>0)
+                    line+="/";
+                line+=to_string(nodo->get_blocks()->at(i));
+            }
+        }
+        line+=")";
         line+="\n";
         //cout<<line.length()<< " "<<line.size()<<endl;
 
@@ -290,10 +300,13 @@ int Arbol::load_arbol()
                 bool dir;
                 off_t tam;
                 time_t date;
+                vector<int>* blocks=NULL;
 
 
                 //coger elemento linea
                 line_info = get_elements(line,",");
+                if(line_info->size()==0)
+                    break;
                 //id
                 id = atoi(line_info->at(0).c_str());
                 //nivel
@@ -308,7 +321,7 @@ int Arbol::load_arbol()
                     padre=listaNodos->at(idPadre);
 
                 //hijos
-                    // poner a null y buscar despues;
+                    // los hijos se añaden desde ellos mismos, no desde el padre
                 vectorHijos->push_back(line_info->at(4));
                 //is_dir
                 if( atoi(line_info->at(5).c_str())==0)
@@ -319,8 +332,15 @@ int Arbol::load_arbol()
                 tam= atoi(line_info->at(6).c_str());
                 //fecha
                 date= atoi(line_info->at(7).c_str());
+                //bloques de datos en hd
+                if(!dir)
+                {
+                    vector<string>* aux=get_elements(line_info->at(8).c_str(),"(/)");
+                    for(int i=0;i<aux->size();i++)
+                        blocks->push_back(atoi(aux->at(i).c_str()));
+                }
 
-                newNodo= new Nodo(this,id,nivel,nombre,padre,NULL,dir,tam,date);
+                newNodo= new Nodo(this,id,nivel,nombre,padre,NULL,dir,tam,date,blocks);
                 listaNodos->push_back(newNodo);
                 if(id==0)
                 {
@@ -331,6 +351,7 @@ int Arbol::load_arbol()
                 {
                     padre->add_hijo(newNodo);
                 }
+
 
             }
             if(numNodos==listaNodos->size())

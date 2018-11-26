@@ -1,18 +1,22 @@
 #include "nodo.h"
 
-Nodo::Nodo(Arbol *arbol,int id, int nivel, string nombre, Nodo* padre, vector<Nodo*>* hijos,bool dir, off_t tam,time_t date)
+Nodo::Nodo(Arbol *arbol,int id, int nivel, string nombre, Nodo* padre, vector<Nodo*>* hijos,bool dir, off_t tam,time_t date,vector<int>*blocks)
 {
     this->arbol=arbol;
     this->id = id;
     this->nivel=nivel;
     this->nombre= nombre;
+    this->org_name= nombre;
     this->padre=padre;
     this->hijos = hijos;
     this->dir=dir;
     this->tamano=tam;
     this->ultima_mod=date;
+    this->blocks=blocks;
 }
-
+vector<int>* Nodo::get_blocks(){
+    return this->blocks;
+}
 Nodo* Nodo::get_padre(){ 
     return this->padre;
 }

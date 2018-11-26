@@ -8,7 +8,7 @@ CFLAGS=-g -DDEBUG -std=c++11 -fopenmp
 LDLIBS=
 INCLUDE=-I. -I./include
 EXEC=practica1
-OBJS=arbol.o main.o terminal.o nodo.o
+OBJS=nodo.o arbol.o main.o terminal.o harddisc.o  
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(LDLIBS) $(OBJS) -o $(EXEC)

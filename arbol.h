@@ -9,6 +9,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <string.h>
+#include "harddisc.h"
 using namespace std;
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS

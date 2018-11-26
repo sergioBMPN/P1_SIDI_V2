@@ -9,7 +9,7 @@ Terminal::Terminal()
     for(int i=0;i<size;i++) {
         char* name=namelist[i]->d_name;
         //si existe
-        if(!strncmp("arbol.dat",name,9))
+        if(!strncmp("arbol.dat",name,9)&&strlen(name)==9)
         {
             find=1;
             break;

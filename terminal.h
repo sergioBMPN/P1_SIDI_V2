@@ -12,7 +12,7 @@
 #include <omp.h>
 #include <fstream>
 #include <pthread.h>
-
+#include "utilities.h"
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
@@ -33,23 +33,6 @@
 #define CMD_CP 12
 
 using namespace std;
-
-
-typedef struct comando_t
-{
-    int tipo;
-    vector<char*>* argumentos;
-    int num_argumentos;
-}comando_t;
-
-class Terminal;
-
-typedef struct watchDog_t
-{
-    bool* exit;
-    Arbol* arbol;
-    Terminal* terminal;
-}watchDog_t;
 
 class Terminal
 {
