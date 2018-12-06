@@ -13,6 +13,7 @@
 #include <fstream>
 #include <pthread.h>
 #include "utilities.h"
+#include "harddisc.h"
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
@@ -31,18 +32,21 @@
 #define CMD_UPL 10
 #define CMD_MV 11
 #define CMD_CP 12
+#define CMD_DWL 13
+
 
 using namespace std;
 
 class Terminal
 {
-    const char* comandos[12]={
+    const char* comandos[13]={
         "cd",
         "mkdir",
 		"pwd",
 		"rmdir",
 		"ls",
 		"upload",
+        "download",
         "lpwd",
         "lls",
         "lcd",
@@ -50,11 +54,13 @@ class Terminal
         "cp",
         "exit"
     };
+    HardDisc * hardDisc;
+    Arbol *arbol;
     static void* comm_exe(void*args);
     static void* watch_dog(void* args);
-public:
-    Arbol *arbol;
-    Terminal();
+
+public:    
+    Terminal(long int discSize);// en Mb
     void run();
     int leer_comando(comando_t *comando);
     void ejecutar_comando(comando_t *comando);
@@ -74,7 +80,7 @@ public:
 	void lpwd();
     void lls();
     void lcd(comando_t* comm);
-
+    void download(comando_t* comm);
 	//visual
 	void pintar_terminal();
 };

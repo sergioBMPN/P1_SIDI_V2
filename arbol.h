@@ -15,6 +15,7 @@ using namespace std;
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
 
 class Nodo;
+class HardDisc;
 class Arbol
 {
    vector<Nodo*>* listaNodos;
@@ -22,10 +23,12 @@ class Arbol
    bool mod;
    Nodo* root;
    vector<Nodo*>* pwd;
+   HardDisc* hardDisc;
+
    bool recursive_dir(vector<Nodo*>* dir,vector<Nodo*>* hijos);
 
 public:
-    Arbol(bool first_init);
+    Arbol(HardDisc *disc, bool first_init);
     Nodo* add_dir(Nodo* padre,string new_nombre,vector<Nodo*>* hijos);
     Nodo* add_recursive_dir(Nodo* org,Nodo* dest);
     Nodo* add_file(Nodo* padre,string new_nombre,off_t size);

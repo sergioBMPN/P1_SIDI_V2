@@ -22,17 +22,17 @@ class HardDisc
     vector<block_t*>* freeBlocks;
     vector<block_t*>* blockList;
 
+    int writeBlock(block_t* block, int disc_num);
+    int readBlock(block_t* block, int disc_num);
+
 public:
-    HardDisc(int hdSize, int num_hd, int bSize);
+    HardDisc(long int hdSize, int num_hd, int bSize);
     int get_totalSize();
     int get_blockSize();
     int get_numBlocks();
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();
-
-    int writeBlock(block_t* block, int disc_num);
-    int readBlock(block_t* block, int disc_num);
 
     int writeFile(Nodo* file);
     int readFile(Nodo* file);

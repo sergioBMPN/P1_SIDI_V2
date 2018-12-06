@@ -1,9 +1,9 @@
 ﻿#include "terminal.h"
 
-Terminal::Terminal()
+Terminal::Terminal(long int discSize)
 {
     struct dirent **namelist;
-
+    this->hardDisc= new HardDisc(discSize*1024*1024,1,1024);
     int size=scandir(".",&namelist,NULL,alphasort);
     int find=0;
     for(int i=0;i<size;i++) {
@@ -18,7 +18,7 @@ Terminal::Terminal()
     if(find)// si lo encuentra
     {
         printf("Cargando sistema de ficheros\n");
-        arbol=new Arbol(false);
+        arbol=new Arbol(hardDisc,false);
         if(arbol->load_arbol()==-1)
         {
             cout<< "no se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
@@ -26,7 +26,8 @@ Terminal::Terminal()
         }
     }
     else
-        arbol=new Arbol(true);
+        arbol=new Arbol(hardDisc,true);
+
 
 }
 
@@ -150,6 +151,9 @@ int Terminal::get_tipo_comm(char* comando){
             if (!strncmp("upload", comando, 6) && strlen(comando) == 6) {
                 return CMD_UPL;
             }
+            if (!strncmp("download", comando, 8) && strlen(comando) == 8) {
+                return CMD_DWL;
+            }
             if(!strncmp("exit", comando, 4) && strlen(comando) == 4){
                 return CMD_EXIT;
             }
@@ -220,6 +224,12 @@ void Terminal::ejecutar_comando(comando_t *comando){
                 cout <<"Debe introducir argumentos en la sentencia"<< endl;
             else
                 upload(comando);
+            break;
+        case CMD_DWL:
+            if(comando->argumentos->size()==0)
+                cout <<"Debe introducir argumentos en la sentencia"<< endl;
+            else
+                download(comando);
             break;
         case CMD_EXIT:
 			shut_down();
@@ -441,45 +451,84 @@ void Terminal::rmdir(comando_t * comm)
 void Terminal::rm(comando_t * comm)
 {
     arbol->set_mod(true);
-	char split[2] = "/";
-	char* token;
-	Nodo* nodo;
-	string last_token;
-	Nodo* last_nodo;
 
-	//encontrar argumento en lista nodos
-	//separar path
-	//buscar los nodos
+    int end = 0;
+    char split[2] = "/";
+    string token;
+    Nodo* nodo;
+    Nodo *padre;
+    vector<Nodo*>* path = new vector<Nodo*>;
+    vector<string> *line;
+    vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 
-    token = strtok(comm->argumentos->at(0), split);
-	nodo = arbol->get_nodo(token);
-	last_nodo = nodo;
+    end=1;
+    line = arbol->get_elements(comm->argumentos->at(0), split);
 
-    if (nodo != NULL)
-	{
-		while (token != NULL)//&& nodo != NULL)
-		{
-			token = strtok(NULL, split);
+    for(int i=0;i<line->size();i++)
+    {
+        token= line->at(i);
+        if(i==0)//si el primero no es root tengo que comprobar que sea hijo del pwd
+        {
+            if(0!=strncmp(token.c_str(), arbol->get_root()->get_nombre().c_str(),4))//si no es root
+            {
+               padre = arbol->get_pwd()->back();
+               nodo =arbol->find_child(padre,token);
+               if(nodo==NULL)//si no es hijo
+               {
+                   cout <<"Error 1.0 el nodo "<<token <<" no existe o no es un directorio"<<endl;
+                   end=-1;
+                   break;
+               }
+               else // si existe
+                   for (int i = 0; i < arbol->get_pwd()->size(); i++)//añadimos toda la ruta hasta el nodo actual
+                       path->push_back(arbol->get_pwd()->at(i));
+            }
+            // si el nodo es root la ruta a la que vamos a ir parte desde aqui
+            nodo=arbol->get_nodo(token);
+            path->push_back(nodo);
+        }
+        else// el resto de iteraciones
+        {
+            nodo=arbol->find_child(path->back(),token);
+            if(nodo!=NULL)//si es hijo de su padre
+            {
+                path->push_back(nodo);
+            }
+            else// si no es su hijo
+            {
+                cout <<"Error 2.0 el nodo "<<token <<" no existe o no es un directorio"<<endl;
+                end=-1;
+                break;
+            }
+        }
+        if(i==line->size()-1)//si es el ultimo comprobar ademas que es un archivo
+        {
+            nodo=path->back();
+            if(nodo!=NULL)//si es hijo de su padre
+            {
+                if(nodo->get_type())// si es un dir
+                {
+                    cout <<"Error 3.0 el nodo "<<token <<" es un directorio"<<endl;
+                    end=-1;
+                    break;
+                }
+            }
+            else
+            {
+                cout <<"Error 3.1 el nodo "<<token <<" no existe"<<endl;
+                end=-1;
+                break;
+            }
+        }
 
-            if (token != NULL) {
-				last_nodo = nodo;
-				nodo = arbol->find_child(nodo, token);
-			}
-			else if (token == NULL && nodo != NULL) //cuando ya es el ultimo de la sentencia (el nodo a borrar)
-			{
-				if (last_nodo->get_type())
-					cout << "Error " << last_nodo->get_nombre() << " es un directorio, para eliminarlo utilice rmdir <directorio>" << endl;
-				else
-					arbol->delete_child(last_nodo->get_padre(), last_nodo);
-			}
+    }
 
-			else
-				cout << "Error 1.0 la ruta no es un archivo o no existe" << endl;
-		}
-	}
-	else {
-		cout << "Error 1.2 la ruta no es un archivo o no existe" << endl;
-	}
+    if(end==1)
+    {
+        arbol->delete_child(path->back()->get_padre(), path->back());
+    }
+
+
 }
 
 void Terminal::ls()
@@ -842,6 +891,86 @@ void Terminal::cp(comando_t* comm)
 
 }
 
+void Terminal::download(comando_t* comm)
+{
+    int end = 0;
+    char split[2] = "/";
+    string token;
+    Nodo* nodo;
+    Nodo *padre;
+    vector<Nodo*>* path = new vector<Nodo*>;
+    vector<string> *line;
+    vector<Nodo*>* pwd_actual = new vector<Nodo*>;
+
+    end=1;
+    line = arbol->get_elements(comm->argumentos->at(0), split);
+
+    for(int i=0;i<line->size();i++)
+    {
+        token= line->at(i);
+        if(i==0)//si el primero no es root tengo que comprobar que sea hijo del pwd
+        {
+            if(0!=strncmp(token.c_str(), arbol->get_root()->get_nombre().c_str(),4))//si no es root
+            {
+               padre = arbol->get_pwd()->back();
+               nodo =arbol->find_child(padre,token);
+               if(nodo==NULL)//si no es hijo
+               {
+                   cout <<"Error 1.0 el nodo "<<token <<" no existe o no es un directorio"<<endl;
+                   end=-1;
+                   break;
+               }
+               else // si existe
+                   for (int i = 0; i < arbol->get_pwd()->size(); i++)//añadimos toda la ruta hasta el nodo actual
+                       path->push_back(arbol->get_pwd()->at(i));
+            }
+            // si el nodo es root la ruta a la que vamos a ir parte desde aqui
+            nodo=arbol->get_nodo(token);
+            path->push_back(nodo);
+        }
+        else// el resto de iteraciones
+        {
+            nodo=arbol->find_child(path->back(),token);
+            if(nodo!=NULL)//si es hijo de su padre
+            {
+                path->push_back(nodo);
+            }
+            else// si no es su hijo
+            {
+                cout <<"Error 2.0 el nodo "<<token <<" no existe o no es un directorio"<<endl;
+                end=-1;
+                break;
+            }
+        }
+        if(i==line->size()-1)//si es el ultimo comprobar ademas que es un archivo
+        {
+            if(nodo!=NULL)//si es hijo de su padre
+            {
+                if(!nodo->get_type())// si es un archivo
+                    path->push_back(nodo);
+                else
+                {
+                    cout <<"Error 3.0 el nodo "<<token <<" es un directorio"<<endl;
+                    end=-1;
+                    break;
+                }
+            }
+            else
+            {
+                cout <<"Error 3.1 el nodo "<<token <<" no existe"<<endl;
+                end=-1;
+                break;
+            }
+        }
+    }
+
+    if(end==1)
+    {
+        hardDisc->readFile(path->back());
+    }
+
+
+}
 //visuales
 void Terminal::pintar_terminal() {
 

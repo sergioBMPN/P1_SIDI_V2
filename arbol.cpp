@@ -1,13 +1,13 @@
 #include "arbol.h"
 
 
- Arbol::Arbol(bool first_init=true)
+ Arbol::Arbol(HardDisc* disc,bool first_init=true)
  {
     listaNodos = new vector<Nodo*>();
 	pwd = new vector<Nodo*>();
     last_id=0;
     mod=false;
-
+    hardDisc=disc;
     if(first_init)
     {
         time_t t = time(0);
@@ -60,6 +60,9 @@
      time_t t=time(0);
      last_id++;
      Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,false,size,t,NULL);
+
+     //añadir el nod al hd
+     hardDisc->writeFile(n_nodo);
 
      padre->add_hijo(n_nodo);
      listaNodos->push_back(n_nodo);

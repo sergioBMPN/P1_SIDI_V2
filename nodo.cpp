@@ -12,7 +12,11 @@ Nodo::Nodo(Arbol *arbol,int id, int nivel, string nombre, Nodo* padre, vector<No
     this->dir=dir;
     this->tamano=tam;
     this->ultima_mod=date;
-    this->blocks=blocks;
+    if(blocks==NULL)
+        this->blocks=new vector<int>;
+    else
+        this->blocks=blocks;
+
 }
 vector<int>* Nodo::get_blocks(){
     return this->blocks;

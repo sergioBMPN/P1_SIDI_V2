@@ -1,9 +1,9 @@
 #include "harddisc.h"
 
-HardDisc::HardDisc(int hdSize, int num_hd, int bSize)
+HardDisc::HardDisc(long int hdSize, int num_hd, int bSize)
 {
     this->totalSize=hdSize;
-    this->totalSize=bSize;
+    this->blockSize=bSize;
     this->numblocks= hdSize/bSize;
     int resto = hdSize%bSize;
     if (resto!=0)
@@ -14,18 +14,18 @@ HardDisc::HardDisc(int hdSize, int num_hd, int bSize)
 
     for(int i=0;i<numblocks;i++)
     {
-        block_t* block;
+        block_t* block= new block_t;
         block->blockId=i;
         block->status=FREE;
-        freeBlocks->at(i)=block;
-        blockList->at(i)=block;
+        freeBlocks->push_back(block);
+        blockList->push_back(block);
     }
     for(int i=0;i<num_hd;i++)
     {
         string fname="HDisc";
         fname+=to_string(i);
         fname+=".dat";
-        hdisc->at(i)= fname;
+        hdisc->push_back(fname);
     }
 }
 
@@ -54,13 +54,14 @@ vector<block_t*>* HardDisc::get_blockList()
 
 int HardDisc::writeBlock(block_t* block, int disc_num)
 {
-    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"wb");
+    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"w");
     if(disc== NULL)
         return -1;
     else
     {
         fseek(disc,blockSize*block->blockId,SEEK_SET);
         fputs(block->info,disc);
+        fclose(disc);
         return 1;
     }
 
@@ -68,7 +69,7 @@ int HardDisc::writeBlock(block_t* block, int disc_num)
 }
 int HardDisc::readBlock(block_t* block, int disc_num)
 {
-    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"rb");
+    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"r+");
     if(disc== NULL)
         return -1;
     else
@@ -76,6 +77,7 @@ int HardDisc::readBlock(block_t* block, int disc_num)
         fseek(disc,blockSize*block->blockId,SEEK_SET);
         char* buffer = (char*) malloc (sizeof(char)*blockSize);
         block->info=buffer;
+        fclose(disc);
         return 1;
     }
 
@@ -83,13 +85,14 @@ int HardDisc::readBlock(block_t* block, int disc_num)
 
 int HardDisc::writeFile(Nodo* file)
 {
-    if(file->get_tam()<=blockSize*freeBlocks->size())// si entra en el disco
+    long int tamActual=blockSize*freeBlocks->size();
+    if(file->get_tam()<=tamActual)// si entra en el disco
     {
         int fileBlocks=file->get_tam()/blockSize;
         if(file->get_tam()%blockSize!=0) fileBlocks++;
         for(int j=0;j<hdisc->size();j++)
         {
-            FILE *f=fopen(file->get_nombre().c_str(),"rb");
+            FILE *f=fopen(file->get_nombre().c_str(),"r+");
             for(int i=0;i<fileBlocks;i++)
             {
                 block_t* block = freeBlocks->at(i);
@@ -106,6 +109,7 @@ int HardDisc::writeFile(Nodo* file)
                  freeBlocks->erase(freeBlocks->begin()+i);
                 }
             }
+            fclose(f);//cerramos el fichero disco duro
         }
         return 1;
     }
@@ -115,10 +119,9 @@ int HardDisc::readFile(Nodo* file)
     int fileBlocks=file->get_blocks()->size();
     for(int j=0;j<hdisc->size();j++)
     {
-        FILE *f=fopen(file->get_nombre().c_str(),"rb");
         for(int i=0;i<fileBlocks;i++)
         {
-            block_t *block;
+            block_t *block=new block_t;
             block->blockId = file->get_blocks()->at(j);
             block->status= blockList->at(block->blockId);
 
@@ -129,31 +132,13 @@ int HardDisc::readFile(Nodo* file)
                 //guardamos el archivo que hemos leido con la extension .read
                 string namef= file->get_nombre();
                 namef+=".read";
-                int fileBlocks=file->get_tam()/blockSize;
-                if(file->get_tam()%blockSize!=0) fileBlocks++;
 
-                FILE *f=fopen(namef.c_str(),"rb");
-                for(int i=0;i<fileBlocks;i++)
-                {
-                    block_t* block = freeBlocks->at(i);
-                    char* buffer = (char*) malloc (sizeof(char)*blockSize);
-                    fseek(f,i*blockSize,SEEK_SET);//ponemos el puntero en el inicio del bloque
-                    fread(buffer,1,blockSize,f);//leemos blocksize bytes del documento
-                    block->info = buffer;
-                    if(writeBlock(block,j)==-1)
-                        return -1;
-                    else
-                    {
-                     blockList->at(block->blockId)->status=USED;
-                     file->get_blocks()->push_back(block->blockId);
-                     freeBlocks->erase(freeBlocks->begin()+i);
-                    }
-                }
-
+                FILE *f=fopen(namef.c_str(),"w+");
+                fseek(f,i*blockSize,SEEK_SET);
+                fwrite(block->info,f);
+                fclose(f);
             }
         }
     }
-
 }
-
 

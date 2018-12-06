@@ -3,7 +3,7 @@
 using namespace std;
 
 int main(){
-    Terminal *term = new Terminal();
+    Terminal *term = new Terminal(32);
     term->run();
     return 0;
 }
