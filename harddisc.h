@@ -22,8 +22,8 @@ class HardDisc
     vector<block_t*>* freeBlocks;
     vector<block_t*>* blockList;
 
-    int writeBlock(block_t* block, int disc_num);
-    int readBlock(block_t* block, int disc_num);
+    int writeBlock(block_t* block, int disc_num,int tam);
+    int readBlock(block_t* block, int disc_num,int tam);
 
 public:
     HardDisc(long int hdSize, int num_hd, int bSize);
@@ -31,6 +31,8 @@ public:
     int get_blockSize();
     int get_numBlocks();
     int findBlock(int id);
+    int loadHD();
+    int saveHD();
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();

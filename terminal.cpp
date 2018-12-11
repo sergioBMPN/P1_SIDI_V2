@@ -3,7 +3,6 @@
 Terminal::Terminal(long int discSize)
 {
     struct dirent **namelist;
-    this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
     int size=scandir(".",&namelist,NULL,alphasort);
     int find=0;
     for(int i=0;i<size;i++) {
@@ -14,10 +13,17 @@ Terminal::Terminal(long int discSize)
             find=1;
             break;
         }
+        if(!strncmp("HD.dat",name,6)&&strlen(name)==6)
+        {
+            find=2;
+            break;
+        }
     }
-    if(find)// si lo encuentra
+    if(find==2)// si lo encuentra
     {
+
         printf("Cargando sistema de ficheros\n");
+        hardDisc->loadHD();
         arbol=new Arbol(hardDisc,false);
         if(arbol->load_arbol()==-1)
         {
@@ -26,7 +32,10 @@ Terminal::Terminal(long int discSize)
         }
     }
     else
+    {
+        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         arbol=new Arbol(hardDisc,true);
+    }
 
 
 }
