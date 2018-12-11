@@ -3,7 +3,7 @@
 Terminal::Terminal(long int discSize)
 {
     struct dirent **namelist;
-    this->hardDisc= new HardDisc(discSize*1024*1024,1,1024);
+    this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
     int size=scandir(".",&namelist,NULL,alphasort);
     int find=0;
     for(int i=0;i<size;i++) {

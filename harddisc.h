@@ -30,6 +30,7 @@ public:
     int get_totalSize();
     int get_blockSize();
     int get_numBlocks();
+    int findBlock(int id);
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();
