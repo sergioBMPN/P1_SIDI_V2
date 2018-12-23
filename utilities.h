@@ -1,7 +1,8 @@
-#ifndef UTILITIES_H
-#define UTILITIES_H
+#pragma once
 #include<vector>
 #include<string>
+#include <string.h>
+
 #define FREE true
 #define USED false
 
@@ -30,25 +31,7 @@ typedef struct block_t{
     char* info;//info a guardar
 }block_t;
 
-vector<string>* get_elements(string line,string split)
-{
-     vector<string>* out = new vector<string>();
+vector<string>* get_elements(string line,string split);
+int findId(vector<string> *list,int id);
 
-     char * c_line = new char[line.size() + 1];
-     std::copy(line.begin(), line.end(), c_line);
-     c_line[line.size()] = '\0';
-
-     char *token = (strtok(c_line, split.c_str()));
-     if(token != NULL)
-     {
-         out->push_back(string(token));
-         while (token != NULL) {
-             token = (strtok(NULL, split.c_str()));
-             if (token != NULL)
-                 out->push_back(string(token));
-         }
-     }
-     return out;
-
-}
-#endif // UTILITIES_H
+// UTILITIES_H

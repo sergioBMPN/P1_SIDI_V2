@@ -1,5 +1,4 @@
-#ifndef HARDDISC_H
-#define HARDDISC_H
+#pragma once
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +31,7 @@ public:
     int get_numBlocks();
     int findBlock(int id);
     int loadHD();
-    int saveHD();
+    int saveHD(vector<Nodo*> *nodos);
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();
@@ -42,5 +41,3 @@ public:
 
 
 };
-
-#endif // HARDDISC_H

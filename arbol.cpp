@@ -211,6 +211,7 @@
  }
 
  void Arbol::save_arbol(){
+     hardDisc->saveHD(listaNodos);
      string file="arbol.dat";
      Nodo* nodo;
      Nodo* padre;
@@ -303,7 +304,7 @@ int Arbol::load_arbol()
                 bool dir;
                 off_t tam;
                 time_t date;
-                vector<int>* blocks=NULL;
+                vector<int>* blocks=new vector<int>;
 
 
                 //coger elemento linea
@@ -354,8 +355,6 @@ int Arbol::load_arbol()
                 {
                     padre->add_hijo(newNodo);
                 }
-
-
             }
             if(numNodos==listaNodos->size())
                 result=1;
