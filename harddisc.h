@@ -16,6 +16,7 @@ class HardDisc
 {
     vector<string>* hdisc;
     int totalSize;
+    int freeSize;
     int blockSize;
     int numblocks;
     vector<block_t*>* freeBlocks;

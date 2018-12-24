@@ -4,6 +4,7 @@ HardDisc::HardDisc(long int hdSize, int num_hd, int bSize)//,bool first_init=tru
 {
    // if(first_init){
         this->totalSize=hdSize*num_hd;
+        this->freeSize=hdSize*num_hd;
         this->blockSize=bSize;
         this->numblocks= hdSize/bSize;
         int resto = hdSize%bSize;
@@ -176,8 +177,6 @@ int HardDisc::writeBlock(block_t* block, int disc_num, int tam)
         fclose(disc);
         return 1;
     }
-
-
 }
 int HardDisc::readBlock(block_t* block, int disc_num,int tam)
 {
@@ -196,11 +195,10 @@ int HardDisc::readBlock(block_t* block, int disc_num,int tam)
 
 }
 
-//TODO: Hay que quitar el resto de bloques de un sector
+//TODO: Hay que quitar el resto de bloques de un sector???
 int HardDisc::writeFile(Nodo* file)// escribir en disco
 {
-    long int tamActual=blockSize*freeBlocks->size();
-    if(file->get_tam()<=tamActual)// si entra en el disco
+    if(file->get_tam()<=freeSize)// si entra en el disco
     {
         int fileBlocks=file->get_tam()/blockSize;
         if(file->get_tam()%blockSize!=0) fileBlocks++;
@@ -230,18 +228,33 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
                 file->get_blocks()->push_back(block->blockId);
 //                int pos=findBlock(block->blockId);
 //                if(pos>=0)
-                freeBlocks->erase(freeBlocks->begin());// hay que hacer una funcion para liberar buscando el id
+                freeBlocks->erase(freeBlocks->begin());
             }
         }
          fclose(f);//cerramos el fichero disco duro
-        tamActual=tamActual-file->get_tam();
+         int totalBlocks=hdisc->size()-(fileBlocks%hdisc->size());
+         for(int i=0;i<totalBlocks;i++)
+         {
+             int id=file->get_blocks()->back()+1;
+             int pos=findBlock(id);
+             if(pos!=-1)
+             {
+                 blockList->at(id)->status=USED;
+                 file->get_blocks()->push_back(id);
+                 freeBlocks->erase(freeBlocks->begin()+pos);
+             }
+         }
+        freeSize=freeSize-file->get_tam();
         return 1;
     }
     return-1;
 }
 int HardDisc::readFile(Nodo* file)//leer de disco
 {
-    int fileBlocks=file->get_blocks()->size();
+    int fileBlocks, totalBlocks;
+    totalBlocks=file->get_blocks()->size();//ocupando todos los block del ultimo sector ocupado
+    fileBlocks=file->get_tam()/blockSize;
+    if(file->get_tam()%blockSize!=0) fileBlocks++;
     for(int i=0;i<fileBlocks;i++)
     {
         int disco=0;
@@ -250,7 +263,7 @@ int HardDisc::readFile(Nodo* file)//leer de disco
             writeSize=file->get_tam()%blockSize;
         block_t *block=new block_t;
         block->blockId = file->get_blocks()->at(i);
-        block->status= blockList->at(block->blockId);//hacer funcion find
+        block->status= USED;//hacer funcion find
         disco=block->blockId%hdisc->size();
         if(readBlock(block,disco,writeSize)==-1)
             return -1;
@@ -258,18 +271,14 @@ int HardDisc::readFile(Nodo* file)//leer de disco
         {
             //guardamos el archivo que hemos leido con la extension .read
             string namef= file->get_nombre();
+//            namef+=to_string(i);
             namef+=".read";
-
+            if(i==3)
+                printf("%s",block->info);
             FILE *f=fopen(namef.c_str(),"a");
             fseek(f,i*blockSize,SEEK_SET);
-
-            //if i == fin escribir resto
-            if(i==fileBlocks-1)
-                writeSize=file->get_tam()%blockSize;
-
             fwrite(block->info,sizeof(char),writeSize,f);
             fclose(f);
-
         }
     }
 }
