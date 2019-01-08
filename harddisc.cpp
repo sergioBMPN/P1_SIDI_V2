@@ -180,29 +180,29 @@ int HardDisc::writeBlock(block_t* block, int disc_num, int tam)
 }
 int HardDisc::readBlock(block_t* block, int disc_num,int tam)
 {
-    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"r+");
+    FILE *disc = fopen(hdisc->at(disc_num).c_str(),"r");
     if(disc== NULL)
         return -1;
     else
     {
         fseek(disc,blockSize*(block->blockId/hdisc->size()),SEEK_SET);
-        char* buffer = (char*) malloc (sizeof(char)*tam);
+        char* buffer = (char*) malloc (sizeof(char)*tam+1);
         fread(buffer,sizeof(char),tam,disc);
         block->info=buffer;
         fclose(disc);
         return 1;
     }
-
 }
 
-//TODO: Hay que quitar el resto de bloques de un sector???
+//TODO: Hay que quitar el resto de bloques de un sector->DONE
+//TODO: Creo que esta leyendo desde el ultimo punto escrio, no desde el ultimo bloque usado????
 int HardDisc::writeFile(Nodo* file)// escribir en disco
 {
     if(file->get_tam()<=freeSize)// si entra en el disco
     {
         int fileBlocks=file->get_tam()/blockSize;
         if(file->get_tam()%blockSize!=0) fileBlocks++;
-
+        char* buffer;
         FILE *f=fopen(file->get_nombre().c_str(),"r");
         for(int i=0;i<fileBlocks;i++)
         {
@@ -215,15 +215,28 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
 //                return-1;
 //            block_t* block = freeBlocks->at(pos);//buscar la posicion
             block_t* block = freeBlocks->at(0);
-            char* buffer = (char*) malloc (sizeof(char)*readSize);
+//            if(i!=4)
+//            {
+            buffer = NULL;
+            buffer = (char*) malloc (sizeof(char)*blockSize);//problema, esta reservando mas memoria y escribe basura en el HD
             fseek(f,i*blockSize,SEEK_SET);//ponemos el puntero en el inicio del bloque
             fread(buffer,1,readSize,f);//leemos blocksize bytes del documento
             block->info = buffer;
+            string b =buffer;
+           /* }
+            else
+            { buffer = (char*) malloc (sizeof(char)*1009);
+            fseek(f,i*blockSize,SEEK_SET);//ponemos el puntero en el inicio del bloque
+            fread(buffer,1,1009,f);//leemos blocksize bytes del documento
+            block->info = buffer;}
+            string t= buffer;*/
+
             disco=block->blockId%hdisc->size();
-            if(writeBlock(block,disco,readSize)==-1)
+            if(writeBlock(block,disco,blockSize)==-1)
                 return -1;
             else
             {
+                printf("%s",block->info);
                 blockList->at(block->blockId)->status=USED;
                 file->get_blocks()->push_back(block->blockId);
 //                int pos=findBlock(block->blockId);
@@ -232,7 +245,7 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
             }
         }
          fclose(f);//cerramos el fichero disco duro
-         int totalBlocks=hdisc->size()-(fileBlocks%hdisc->size());
+       /*  int totalBlocks=hdisc->size()-(fileBlocks%hdisc->size());
          for(int i=0;i<totalBlocks;i++)
          {
              int id=file->get_blocks()->back()+1;
@@ -244,7 +257,7 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
                  freeBlocks->erase(freeBlocks->begin()+pos);
              }
          }
-        freeSize=freeSize-file->get_tam();
+        freeSize=freeSize-file->get_tam();*/
         return 1;
     }
     return-1;
@@ -263,7 +276,7 @@ int HardDisc::readFile(Nodo* file)//leer de disco
             writeSize=file->get_tam()%blockSize;
         block_t *block=new block_t;
         block->blockId = file->get_blocks()->at(i);
-        block->status= USED;//hacer funcion find
+        block->status= USED;
         disco=block->blockId%hdisc->size();
         if(readBlock(block,disco,writeSize)==-1)
             return -1;
@@ -273,9 +286,8 @@ int HardDisc::readFile(Nodo* file)//leer de disco
             string namef= file->get_nombre();
 //            namef+=to_string(i);
             namef+=".read";
-            if(i==3)
-                printf("%s",block->info);
-            FILE *f=fopen(namef.c_str(),"a");
+            printf("%s",block->info);
+            FILE *f=fopen(namef.c_str(),"a+");
             fseek(f,i*blockSize,SEEK_SET);
             fwrite(block->info,sizeof(char),writeSize,f);
             fclose(f);

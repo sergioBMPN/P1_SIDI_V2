@@ -21,10 +21,9 @@ Terminal::Terminal(long int discSize)
             break;
         }
     }
-    if(find>=1)// si lo encuentra
+    if(find>1)// si lo encuentra
     {
         this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
-
         printf("Cargando sistema de ficheros\n");
         if(hardDisc->loadHD()==-1)
         {
@@ -39,6 +38,17 @@ Terminal::Terminal(long int discSize)
             exit(-1);
         }
 
+    }
+    if(find==1)
+    {
+        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
+        printf("Cargando sistema de ficheros\n");
+        arbol=new Arbol(hardDisc,false);
+        if(arbol->load_arbol()==-1)
+        {
+            cout<< "No se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
+            exit(-1);
+        }
     }
     else
     {
