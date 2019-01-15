@@ -1,8 +1,6 @@
-#pragma once
+#ifndef UTILITIES_H
+#define UTILITIES_H
 #include<vector>
-#include<string>
-#include <string.h>
-
 #define FREE true
 #define USED false
 
@@ -31,7 +29,4 @@ typedef struct block_t{
     char* info;//info a guardar
 }block_t;
 
-vector<string>* get_elements(string line,string split);
-int findId(vector<string> *list,int id);
-
-// UTILITIES_H
+#endif // UTILITIES_H

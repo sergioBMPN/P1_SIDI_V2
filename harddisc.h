@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HARDDISC_H
+#define HARDDISC_H
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,23 +17,19 @@ class HardDisc
 {
     vector<string>* hdisc;
     int totalSize;
-    int freeSize;
     int blockSize;
     int numblocks;
     vector<block_t*>* freeBlocks;
     vector<block_t*>* blockList;
 
-    int writeBlock(block_t* block, int disc_num,int tam);
-    int readBlock(block_t* block, int disc_num,int tam);
+    int writeBlock(block_t* block, int disc_num);
+    int readBlock(block_t* block, int disc_num);
 
 public:
     HardDisc(long int hdSize, int num_hd, int bSize);
     int get_totalSize();
     int get_blockSize();
     int get_numBlocks();
-    int findBlock(int id);
-    int loadHD();
-    int saveHD(vector<Nodo*> *nodos);
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();
@@ -42,3 +39,5 @@ public:
 
 
 };
+
+#endif // HARDDISC_H

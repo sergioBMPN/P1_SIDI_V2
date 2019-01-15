@@ -211,7 +211,6 @@
  }
 
  void Arbol::save_arbol(){
-     hardDisc->saveHD(listaNodos);
      string file="arbol.dat";
      Nodo* nodo;
      Nodo* padre;
@@ -304,7 +303,7 @@ int Arbol::load_arbol()
                 bool dir;
                 off_t tam;
                 time_t date;
-                vector<int>* blocks=new vector<int>;
+                vector<int>* blocks=NULL;
 
 
                 //coger elemento linea
@@ -355,6 +354,8 @@ int Arbol::load_arbol()
                 {
                     padre->add_hijo(newNodo);
                 }
+
+
             }
             if(numNodos==listaNodos->size())
                 result=1;
@@ -369,6 +370,28 @@ int Arbol::load_arbol()
         cout<<"ha sudedido un error "<< e<<endl;
     }
     return result;
+
+}
+
+vector<string>* Arbol::get_elements(string line,string split)
+{
+     vector<string>* out = new vector<string>();
+
+     char * c_line = new char[line.size() + 1];
+     std::copy(line.begin(), line.end(), c_line);
+     c_line[line.size()] = '\0';
+
+     char *token = (strtok(c_line, split.c_str()));
+     if(token != NULL)
+     {
+         out->push_back(string(token));
+         while (token != NULL) {
+             token = (strtok(NULL, split.c_str()));
+             if (token != NULL)
+                 out->push_back(string(token));
+         }
+     }
+     return out;
 
 }
 

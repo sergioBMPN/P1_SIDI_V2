@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "harddisc.h"
-#include "utilities.h"
 using namespace std;
 
 #pragma warning(disable : 4996) //_CRT_SECURE_NO_WARNINGS
@@ -40,6 +39,7 @@ public:
     int delete_child(Nodo* padre,Nodo* nodo);
     void save_arbol();
     int load_arbol();
+    vector<string>* get_elements(string line,string split);
 
     Nodo* get_root();
 	vector<Nodo*>* get_pwd();
@@ -48,4 +48,4 @@ public:
     void set_mod(bool mod);
     void pwd_tostring();
 };
-// ARBOL_H
+//#endif // ARBOL_H
