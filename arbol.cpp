@@ -155,19 +155,30 @@
  int Arbol::delete_child(Nodo* padre ,Nodo* hijo)
  {
 	 vector<Nodo*> *hijos = padre->get_hijos();
-	 int id_borrar=-1;
-	 
-	 if (hijos != NULL)
-		 for (int i = 0; i < hijos->size(); i++)
-			 if (hijos->at(i)->get_id() == hijo->get_id())
-				 id_borrar = i;
-	 if (id_borrar != -1)
-	 {
-		 hijos->erase(hijos->begin() + id_borrar);
-		 listaNodos->erase(listaNodos->begin() + hijo->get_id());
-	 }
+     int id_borrar=-1;
 
-	 return id_borrar;
+     if (hijos != NULL)//busacr hijo
+         for (int i = 0; i < hijos->size(); i++)
+             if (hijos->at(i)->get_id() == hijo->get_id())
+             {
+                 id_borrar = i;
+                 break;
+             }
+     if (id_borrar != -1)//borrar hijo
+     {
+         hijos->erase(hijos->begin() + id_borrar);
+         for(int i=0;i<listaNodos->size();i++)
+         {
+             if(listaNodos->at(i)->get_id() == hijo->get_id())
+             {
+                 id_borrar = i;
+                 break;
+             }
+         }
+         listaNodos->erase(listaNodos->begin() + id_borrar);
+     }
+
+     return id_borrar;
  }
 
  Nodo * Arbol::get_root()
@@ -211,6 +222,7 @@
  }
 
  void Arbol::save_arbol(){
+     hardDisc->saveHD(listaNodos);
      string file="arbol.dat";
      Nodo* nodo;
      Nodo* padre;
@@ -303,7 +315,7 @@ int Arbol::load_arbol()
                 bool dir;
                 off_t tam;
                 time_t date;
-                vector<int>* blocks=NULL;
+                vector<int>* blocks=new vector<int>;
 
 
                 //coger elemento linea
@@ -354,8 +366,6 @@ int Arbol::load_arbol()
                 {
                     padre->add_hijo(newNodo);
                 }
-
-
             }
             if(numNodos==listaNodos->size())
                 result=1;
@@ -370,28 +380,6 @@ int Arbol::load_arbol()
         cout<<"ha sudedido un error "<< e<<endl;
     }
     return result;
-
-}
-
-vector<string>* Arbol::get_elements(string line,string split)
-{
-     vector<string>* out = new vector<string>();
-
-     char * c_line = new char[line.size() + 1];
-     std::copy(line.begin(), line.end(), c_line);
-     c_line[line.size()] = '\0';
-
-     char *token = (strtok(c_line, split.c_str()));
-     if(token != NULL)
-     {
-         out->push_back(string(token));
-         while (token != NULL) {
-             token = (strtok(NULL, split.c_str()));
-             if (token != NULL)
-                 out->push_back(string(token));
-         }
-     }
-     return out;
 
 }
 

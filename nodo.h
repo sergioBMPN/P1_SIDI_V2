@@ -1,5 +1,4 @@
-#ifndef NODO_H
-#define NODO_H
+#pragma once
 #include <string>
 #include <iostream>
 #include <vector>
@@ -47,5 +46,4 @@ public:
 
 
 };
-
-#endif // NODO_H
+// NODO_H

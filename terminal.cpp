@@ -3,7 +3,6 @@
 Terminal::Terminal(long int discSize)
 {
     struct dirent **namelist;
-    this->hardDisc= new HardDisc(discSize*1024*1024,1,1024);
     int size=scandir(".",&namelist,NULL,alphasort);
     int find=0;
     for(int i=0;i<size;i++) {
@@ -11,22 +10,51 @@ Terminal::Terminal(long int discSize)
         //si existe
         if(!strncmp("arbol.dat",name,9)&&strlen(name)==9)
         {
-            find=1;
+            find++;
+        }
+        if(!strncmp("HD.dat",name,6)&&strlen(name)==6)
+        {
+            find++;
+        }
+        if(find==2)
+        {
             break;
         }
     }
-    if(find)// si lo encuentra
+    if(find>1)// si lo encuentra
     {
+        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
+        printf("Cargando sistema de ficheros\n");
+        if(hardDisc->loadHD()==-1)
+        {
+            cout<< "No se ha cargado el HD correctamente, archivo HD.dat corrupto"<<endl;
+            exit(-1);
+        }
+
+        arbol=new Arbol(hardDisc,false);
+        if(arbol->load_arbol()==-1)
+        {
+            cout<< "No se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
+            exit(-1);
+        }
+
+    }
+    if(find==1)
+    {
+        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         printf("Cargando sistema de ficheros\n");
         arbol=new Arbol(hardDisc,false);
         if(arbol->load_arbol()==-1)
         {
-            cout<< "no se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
+            cout<< "No se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
             exit(-1);
         }
     }
     else
+    {
+        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         arbol=new Arbol(hardDisc,true);
+    }
 
 
 }
@@ -57,6 +85,7 @@ void* Terminal::watch_dog(void* args)
         if(wd->arbol->is_mod()){
             wd->arbol->save_arbol();
             wd->arbol->set_mod(false);
+
         }
     }
     pthread_exit(NULL);
@@ -277,7 +306,7 @@ void Terminal::cd(comando_t * comm)
     else
     {
         end=1;
-        line = arbol->get_elements(comm->argumentos->at(0), split);
+        line = get_elements(comm->argumentos->at(0), split);
 
         for(int i=0;i<line->size();i++)
         {
@@ -333,7 +362,7 @@ void Terminal::mkdir(comando_t * comm)
     Nodo* nodo;
     Nodo* padre;
 
-    vector<string> *line = arbol->get_elements(comm->argumentos->at(0),split);
+    vector<string> *line = get_elements(comm->argumentos->at(0),split);
     if(line->size()>0)
     {
         for(int i=0;i<line->size();i++)
@@ -462,7 +491,7 @@ void Terminal::rm(comando_t * comm)
     vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 
     end=1;
-    line = arbol->get_elements(comm->argumentos->at(0), split);
+    line = get_elements(comm->argumentos->at(0), split);
 
     for(int i=0;i<line->size();i++)
     {
@@ -686,7 +715,7 @@ void Terminal::mv(comando_t* comm)
     vector<string> *line;
     int end=0;
 
-    line= arbol->get_elements(comm->argumentos->at(0), split);
+    line= get_elements(comm->argumentos->at(0), split);
 
     for(int i=0;i<line->size();i++)
     {
@@ -766,7 +795,7 @@ void Terminal::cp(comando_t* comm)
     /***SACAMOS EL ARG1 Y ARG2***/ //TODO: No acepta rutas relativas error 2.1 (cp a/nodo.o c/p; pwd:root)
     for(int i=0;i<2;i++)
     {
-        line= arbol->get_elements(comm->argumentos->at(i), split);
+        line= get_elements(comm->argumentos->at(i), split);
         if(line->size()>0)
         {
             for(int j=0;j<line->size();j++)
@@ -903,7 +932,7 @@ void Terminal::download(comando_t* comm)
     vector<Nodo*>* pwd_actual = new vector<Nodo*>;
 
     end=1;
-    line = arbol->get_elements(comm->argumentos->at(0), split);
+    line = get_elements(comm->argumentos->at(0), split);
 
     for(int i=0;i<line->size();i++)
     {
