@@ -395,4 +395,15 @@ void Arbol::set_mod(bool mod)
 #pragma omp flush(mod)
 }
 
-
+int Arbol::format(int tam){
+    this->hardDisc->format(tam);
+    listaNodos = new vector<Nodo*>();
+    pwd = new vector<Nodo*>();
+    last_id=0;
+    mod=false;
+    time_t t = time(0);
+    root = new Nodo(this,0,0,"Root",NULL,NULL,true,4096,t,NULL);
+    listaNodos->push_back(root);
+    pwd->push_back(root);
+    set_mod(true);
+}

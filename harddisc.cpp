@@ -1,38 +1,76 @@
 #include "harddisc.h"
 
-HardDisc::HardDisc(long int hdSize, int num_hd, int bSize)//,bool first_init=true)
+HardDisc::HardDisc(long int hdSize, int num_hd, int bSize)
 {
-   // if(first_init){
-        this->totalSize=hdSize*num_hd;
-        this->freeSize=hdSize*num_hd;
-        this->blockSize=bSize;
-        this->numblocks= hdSize/bSize;
-        int resto = hdSize%bSize;
-        if (resto!=0)
-            numblocks+=1;
-        this->freeBlocks=new vector<block_t*>;
-        this->blockList=new vector<block_t*>;
-        this->hdisc= new vector<string>;
+    this->totalSize=hdSize*num_hd;
+    this->freeSize=hdSize*num_hd;
+    this->blockSize=bSize;
+    this->numblocks= hdSize/bSize;
+    int resto = hdSize%bSize;
+    if (resto!=0)
+        numblocks+=1;
+    this->freeBlocks=new vector<block_t*>;
+    this->blockList=new vector<block_t*>;
+    this->hdisc= new vector<string>;
 
-        //crear bloques
-        for(int i=0;i<numblocks*num_hd;i++)
-        {
-            block_t* block= new block_t;
-            block->blockId=i;
-            block->status=FREE;
-            freeBlocks->push_back(block);
-            blockList->push_back(block);
-        }
-        //crear discos duros
-        for(int i=0;i<num_hd;i++)
-        {
-            string fname="HDisc";
-            fname+=to_string(i);
-            fname+=".dat";
-            hdisc->push_back(fname);
-        }
-    //}
+    //crear bloques
+    for(int i=0;i<numblocks*num_hd;i++)
+    {
+        block_t* block= new block_t;
+        block->blockId=i;
+        block->status=FREE;
+        freeBlocks->push_back(block);
+        blockList->push_back(block);
+    }
+    //crear discos duros
+    for(int i=0;i<num_hd;i++)
+    {
+        string fname="HDisc";
+        fname+=to_string(i);
+        fname+=".dat";
+        hdisc->push_back(fname);
+    }
 }
+
+int HardDisc::format(long int hdSize, int num_hd, int bSize){
+    if(num_hd==0 || bSize==0)
+    {
+        num_hd=this->hdisc->size();
+        bSize=this->blockSize;
+    }
+    this->totalSize=hdSize*num_hd;
+    this->freeSize=hdSize*num_hd;
+    this->blockSize=bSize;
+    this->numblocks= hdSize/bSize;
+    int resto = hdSize%bSize;
+    if (resto!=0)
+        numblocks+=1;
+    this->freeBlocks=new vector<block_t*>;
+    this->blockList=new vector<block_t*>;
+    this->hdisc= new vector<string>;
+
+    //crear bloques
+    for(int i=0;i<numblocks*num_hd;i++)
+    {
+        block_t* block= new block_t;
+        block->blockId=i;
+        block->status=FREE;
+        freeBlocks->push_back(block);
+        blockList->push_back(block);
+    }
+    //crear discos duros
+    for(int i=0;i<num_hd;i++)
+    {
+        string fname="HDisc";
+        fname+=to_string(i);
+        fname+=".dat";
+        hdisc->push_back(fname);
+        remove(fname.c_str());
+    }
+    return 1;
+
+}
+
 int HardDisc::saveHD(vector<Nodo*>* nodos){
 
 
@@ -222,7 +260,6 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
                 return -1;
             else
             {
-                printf("%s",block->info);
                 blockList->at(block->blockId)->status=USED;
                 file->get_blocks()->push_back(block->blockId);
 
@@ -258,7 +295,6 @@ int HardDisc::readFile(Nodo* file)//leer de disco
             string namef= file->get_nombre();
 //            namef+=to_string(i);
             namef+=".read";
-            printf("%s",block->info);
             FILE *f=fopen(namef.c_str(),"a+");
             fseek(f,i*blockSize,SEEK_SET);
             fwrite(block->info,sizeof(char),writeSize,f);

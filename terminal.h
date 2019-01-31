@@ -33,6 +33,8 @@
 #define CMD_MV 11
 #define CMD_CP 12
 #define CMD_DWL 13
+#define CMD_FRM 14
+
 
 
 using namespace std;
@@ -81,6 +83,8 @@ public:
     void lls();
     void lcd(comando_t* comm);
     void download(comando_t* comm);
+    void format(comando_t* comm);
+
 	//visual
 	void pintar_terminal();
 };

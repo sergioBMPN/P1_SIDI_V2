@@ -39,7 +39,7 @@ Terminal::Terminal(long int discSize)
         }
 
     }
-    if(find==1)
+    else if(find==1)
     {
         this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         printf("Cargando sistema de ficheros\n");
@@ -183,6 +183,9 @@ int Terminal::get_tipo_comm(char* comando){
             if (!strncmp("download", comando, 8) && strlen(comando) == 8) {
                 return CMD_DWL;
             }
+            if (!strncmp("format", comando, 6) && strlen(comando) == 6) {
+                return CMD_FRM;
+            }
             if(!strncmp("exit", comando, 4) && strlen(comando) == 4){
                 return CMD_EXIT;
             }
@@ -194,78 +197,84 @@ int Terminal::get_tipo_comm(char* comando){
 void Terminal::ejecutar_comando(comando_t *comando){
 
     switch(comando->tipo){
-        case CMD_CD:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                cd(comando);
-            break;
-        case CMD_CP:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                cp(comando);
-            break;
-        case CMD_MV:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                mv(comando);
-            break;
-        case CMD_MKDIR:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                mkdir(comando);
-            break;
-		case CMD_PWD:
-			pwd();
-			break;
-		case CMD_RMDIR:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                rmdir(comando);
-			break;
-		case CMD_RM:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                rm(comando);
-			break;
-		case CMD_LS:
-			ls();
-			break;
-        case CMD_LPWD:
-            lpwd();
-            break;
-        case CMD_LLS:
-            lls();
-            break;
-        case CMD_LCD:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                lcd(comando);
-            break;
-        case CMD_UPL:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                upload(comando);
-            break;
-        case CMD_DWL:
-            if(comando->argumentos->size()==0)
-                cout <<"Debe introducir argumentos en la sentencia"<< endl;
-            else
-                download(comando);
-            break;
-        case CMD_EXIT:
-			shut_down();
-            break;
-        default:
-            printf("Commando not found\n");
-            break;
+    case CMD_CD:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            cd(comando);
+        break;
+    case CMD_CP:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            cp(comando);
+        break;
+    case CMD_MV:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            mv(comando);
+        break;
+    case CMD_MKDIR:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            mkdir(comando);
+        break;
+    case CMD_PWD:
+        pwd();
+        break;
+    case CMD_RMDIR:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            rmdir(comando);
+        break;
+    case CMD_RM:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            rm(comando);
+        break;
+    case CMD_LS:
+        ls();
+        break;
+    case CMD_LPWD:
+        lpwd();
+        break;
+    case CMD_LLS:
+        lls();
+        break;
+    case CMD_LCD:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            lcd(comando);
+        break;
+    case CMD_UPL:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            upload(comando);
+        break;
+    case CMD_DWL:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            download(comando);
+        break;
+    case CMD_FRM:
+        if(comando->argumentos->size()==0)
+            cout <<"Debe introducir argumentos en la sentencia"<< endl;
+        else
+            format(comando);
+        break;
+    case CMD_EXIT:
+        shut_down();
+        break;
+    default:
+        printf("Commando not found\n");
+        break;
     }
 }
 
@@ -999,6 +1008,12 @@ void Terminal::download(comando_t* comm)
     }
 
 
+}
+
+void Terminal::format(comando_t* comm)
+{
+    int tam =atoi(comm->argumentos->at(0));
+    this->arbol->format(tam);
 }
 //visuales
 void Terminal::pintar_terminal() {

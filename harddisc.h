@@ -33,6 +33,7 @@ public:
     int findBlock(int id);
     int loadHD();
     int saveHD(vector<Nodo*> *nodos);
+    int format(long int hdSize, int num_hd=0, int bSize=0);
 
     vector<block_t*>* get_freeBlocks();
     vector<block_t*>* get_blockList();

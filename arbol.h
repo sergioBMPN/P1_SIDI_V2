@@ -40,6 +40,7 @@ public:
     int delete_child(Nodo* padre,Nodo* nodo);
     void save_arbol();
     int load_arbol();
+    int format(int tam);
 
     Nodo* get_root();
 	vector<Nodo*>* get_pwd();
