@@ -23,7 +23,7 @@ HardDisc::HardDisc(long int hdSize, int num_hd, int bSize)
         blockList->push_back(block);
     }
     //crear discos duros
-    for(int i=0;i<num_hd;i++)
+    for(int i=0;i<num_hd+1;i++)
     {
         string fname="HDisc";
         fname+=to_string(i);
@@ -105,7 +105,6 @@ int HardDisc::saveHD(vector<Nodo*>* nodos){
 }
 
 int HardDisc::loadHD(){
-
     string file="HD.dat";
     string line;
     ifstream f(file.c_str());
@@ -122,7 +121,6 @@ int HardDisc::loadHD(){
             vector<string>* line_info, *line_f;
             getline(f,line);
             line_info = get_elements(line,",");
-
             //coger elemento linea
             if(line_info->size()==0)
                 throw;
@@ -205,6 +203,18 @@ int HardDisc::findBlock(int id){
 
 int HardDisc::writeBlock(block_t* block, int disc_num, int tam)
 {
+    //enviar mensage de escritura
+    send_msg(MSG_UPL,disc_num);
+
+    //enviar posicion fseek
+    int pos=(blockSize*(block->blockId/hdisc->size()));
+    MPI_Send(&pos,1,MPI_INT,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    //enviar tam block
+    MPI_Send(&tam,1,MPI_INT,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    //enviar block
+    MPI_Send(block->info,tam,MPI_CHAR,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    return 0;
+    /*
     FILE *disc = fopen(hdisc->at(disc_num).c_str(),"a");
     if(disc== NULL)
         return -1;
@@ -214,22 +224,36 @@ int HardDisc::writeBlock(block_t* block, int disc_num, int tam)
         fwrite(block->info,sizeof(char),tam,disc);//MPI enviar por separado id y datos block
         fclose(disc);
         return 1;
-    }
+    }*/
 }
 int HardDisc::readBlock(block_t* block, int disc_num,int tam)
-{
+{    
+    //enviar mensage de lectura
+    send_msg(MSG_DWL,disc_num);
+
+    //enviar posicion fseek
+    int pos=(blockSize*(block->blockId/hdisc->size()));
+    MPI_Send(&pos,1,MPI_INT,disc_num,MSG_DWL,MPI_COMM_WORLD);
+    //enviar tam block
+    MPI_Send(&tam,1,MPI_INT,disc_num,MSG_DWL,MPI_COMM_WORLD);
+
+    //recibir block
+    MPI_Status status;
+    MPI_Recv(block->info, tam, MPI_CHAR, MPI_ANY_SOURCE, MSG_DWL,MPI_COMM_WORLD, &status);
+
+    return 0;
+    /*
     FILE *disc = fopen(hdisc->at(disc_num).c_str(),"r");
     if(disc== NULL)
         return -1;
     else
     {
         fseek(disc,blockSize*(block->blockId/hdisc->size()),SEEK_SET);
-        char* buffer = (char*) malloc (sizeof(char)*tam+1);
         fread(buffer,sizeof(char),tam,disc);
         block->info=buffer;
         fclose(disc);
         return 1;
-    }
+    }*/
 }
 
 int HardDisc::writeFile(Nodo* file)// escribir en disco
@@ -255,7 +279,7 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
             block->info = buffer;
             string b =buffer;
 
-            disco=block->blockId%hdisc->size();
+            disco=block->blockId%hdisc->size()+1;
             if(writeBlock(block,disco,blockSize)==-1)
                 return -1;
             else
@@ -286,14 +310,13 @@ int HardDisc::readFile(Nodo* file)//leer de disco
         block_t *block=new block_t;
         block->blockId = file->get_blocks()->at(i);
         block->status= USED;
-        disco=block->blockId%hdisc->size();
+        disco=block->blockId%hdisc->size()+1;
         if(readBlock(block,disco,writeSize)==-1)
             return -1;
         else
         {
             //guardamos el archivo que hemos leido con la extension .read
             string namef= file->get_nombre();
-//            namef+=to_string(i);
             namef+=".read";
             FILE *f=fopen(namef.c_str(),"a+");
             fseek(f,i*blockSize,SEEK_SET);

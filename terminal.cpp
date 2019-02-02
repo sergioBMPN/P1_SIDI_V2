@@ -1,6 +1,6 @@
 ﻿#include "terminal.h"
 
-Terminal::Terminal(long int discSize)
+Terminal::Terminal(long int discSize, int n_disc)
 {
     struct dirent **namelist;
     int size=scandir(".",&namelist,NULL,alphasort);
@@ -21,27 +21,24 @@ Terminal::Terminal(long int discSize)
             break;
         }
     }
+    this->hardDisc= new HardDisc(discSize*1024*1024,n_disc,1024);
     if(find>1)// si lo encuentra
     {
-        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         printf("Cargando sistema de ficheros\n");
         if(hardDisc->loadHD()==-1)
         {
             cout<< "No se ha cargado el HD correctamente, archivo HD.dat corrupto"<<endl;
             exit(-1);
         }
-
         arbol=new Arbol(hardDisc,false);
         if(arbol->load_arbol()==-1)
         {
             cout<< "No se ha cargado el arbol correctamente, archivo arbol.dat corrupto"<<endl;
             exit(-1);
         }
-
     }
     else if(find==1)
     {
-        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         printf("Cargando sistema de ficheros\n");
         arbol=new Arbol(hardDisc,false);
         if(arbol->load_arbol()==-1)
@@ -52,7 +49,6 @@ Terminal::Terminal(long int discSize)
     }
     else
     {
-        this->hardDisc= new HardDisc(discSize*1024*1024,4,1024);
         arbol=new Arbol(hardDisc,true);
     }
 
@@ -65,7 +61,6 @@ void * Terminal::comm_exe(void*args)
     comando_t comando;
     watchDog_t* wd=(watchDog_t*)args;
     bool *exit=wd->exit;
-
     while(!(*exit)){
         comando.argumentos = new vector<char*>();
         wd->terminal->pintar_terminal();
@@ -669,7 +664,10 @@ void Terminal::shut_down()
 	//salvar datos
     if(arbol->is_mod())
         arbol->save_arbol();
-
+    int numProc = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &numProc);
+    for(int i=1;i<=numProc;i++)
+        send_msg(MSG_EXIT,i);
 	exit(0);
 }
 

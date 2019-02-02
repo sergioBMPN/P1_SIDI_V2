@@ -62,7 +62,7 @@ class Terminal
     static void* watch_dog(void* args);
 
 public:    
-    Terminal(long int discSize);// en Mb
+    Terminal(long int discSize, int n_disc);// en Mb
     void run();
     int leer_comando(comando_t *comando);
     void ejecutar_comando(comando_t *comando);

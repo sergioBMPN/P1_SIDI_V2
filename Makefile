@@ -1,14 +1,14 @@
 # Prueba mpi
 
 #variable compilador
-CC=g++
+CC=mpiCC
 #optimizaciones
 #CFLAGS=-DDEBUG -O3 #-D (pasar variables) -O[0,1,2,3](optimizacion)
-CFLAGS=-g -DDEBUG -std=c++11 -fopenmp
+CFLAGS=-g -DDEBUG -std=c++11 -lpthread
 LDLIBS=
 INCLUDE=-I. -I./include
 EXEC=practica1
-OBJS=utilities.o nodo.o arbol.o main.o terminal.o harddisc.o 
+OBJS=utilities.o nodo.o arbol.o main.o terminal.o harddisc.o slave.o
 
 all: $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(LDLIBS) $(OBJS) -o $(EXEC)

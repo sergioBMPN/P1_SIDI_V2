@@ -2,9 +2,15 @@
 #include<vector>
 #include<string>
 #include <string.h>
+#include"mpi/mpi.h"
 
 #define FREE true
 #define USED false
+
+#define MSG_EXIT 0
+#define MSG_UPL 1
+#define MSG_DWL 2
+#define MSG_FRM 3
 
 using namespace std;
 typedef struct comando_t
@@ -33,5 +39,8 @@ typedef struct block_t{
 
 vector<string>* get_elements(string line,string split);
 int findId(vector<string> *list,int id);
+
+void send_msg(int type, int dest);
+int recv_msg();
 
 // UTILITIES_H
