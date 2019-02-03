@@ -60,7 +60,7 @@
      time_t t=time(0);
      last_id++;
      Nodo *n_nodo= new Nodo(this,last_id,(padre->get_nivel()+1),new_nombre,padre,NULL,false,size,t,NULL);
-
+     printf("p");
      //añadir el nod al hd
      hardDisc->writeFile(n_nodo);
 

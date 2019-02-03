@@ -208,11 +208,11 @@ int HardDisc::writeBlock(block_t* block, int disc_num, int tam)
 
     //enviar posicion fseek
     int pos=(blockSize*(block->blockId/hdisc->size()));
-    MPI_Send(&pos,1,MPI_INT,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    MPI_Send(&pos,sizeof(int),MPI_BYTE,disc_num,MSG_UPL,MPI_COMM_WORLD);
     //enviar tam block
-    MPI_Send(&tam,1,MPI_INT,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    MPI_Send(&tam,sizeof(int),MPI_BYTE,disc_num,MSG_UPL,MPI_COMM_WORLD);
     //enviar block
-    MPI_Send(block->info,tam,MPI_CHAR,disc_num,MSG_UPL,MPI_COMM_WORLD);
+    MPI_Send(block->info,sizeof(char)*tam,MPI_BYTE,disc_num,MSG_UPL,MPI_COMM_WORLD);
     return 0;
     /*
     FILE *disc = fopen(hdisc->at(disc_num).c_str(),"a");
@@ -233,13 +233,13 @@ int HardDisc::readBlock(block_t* block, int disc_num,int tam)
 
     //enviar posicion fseek
     int pos=(blockSize*(block->blockId/hdisc->size()));
-    MPI_Send(&pos,1,MPI_INT,disc_num,MSG_DWL,MPI_COMM_WORLD);
+    MPI_Send(&pos,sizeof(int),MPI_BYTE,disc_num,MSG_DWL,MPI_COMM_WORLD);
     //enviar tam block
-    MPI_Send(&tam,1,MPI_INT,disc_num,MSG_DWL,MPI_COMM_WORLD);
+    MPI_Send(&tam,sizeof(int),MPI_BYTE,disc_num,MSG_DWL,MPI_COMM_WORLD);
 
     //recibir block
     MPI_Status status;
-    MPI_Recv(block->info, tam, MPI_CHAR, MPI_ANY_SOURCE, MSG_DWL,MPI_COMM_WORLD, &status);
+    MPI_Recv(block->info, sizeof(char)*tam, MPI_BYTE, disc_num, MSG_DWL,MPI_COMM_WORLD, &status);
 
     return 0;
     /*
@@ -280,6 +280,7 @@ int HardDisc::writeFile(Nodo* file)// escribir en disco
             string b =buffer;
 
             disco=block->blockId%hdisc->size()+1;
+
             if(writeBlock(block,disco,blockSize)==-1)
                 return -1;
             else

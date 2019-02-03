@@ -16,10 +16,12 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if(rank==0){
-        Terminal *term = new Terminal(32,numProc);
+        cout<<"Hola soy el master"<<endl;
+        Terminal *term = new Terminal(32,numProc-1);
         term->run();
     }
     else{
+        cout<<"Hola soy un escalvo"<<endl;
         bool exit= false;
         Slave *slave=new Slave();
         while(!exit)

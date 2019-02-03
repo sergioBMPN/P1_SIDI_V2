@@ -61,10 +61,11 @@ void * Terminal::comm_exe(void*args)
     comando_t comando;
     watchDog_t* wd=(watchDog_t*)args;
     bool *exit=wd->exit;
+
     while(!(*exit)){
         comando.argumentos = new vector<char*>();
         wd->terminal->pintar_terminal();
-         if(wd->terminal->leer_comando(&comando)==0)
+        if(wd->terminal->leer_comando(&comando)==0)
             wd->terminal->ejecutar_comando(&comando);
         free(comando.argumentos);
     }
@@ -80,7 +81,6 @@ void* Terminal::watch_dog(void* args)
         if(wd->arbol->is_mod()){
             wd->arbol->save_arbol();
             wd->arbol->set_mod(false);
-
         }
     }
     pthread_exit(NULL);
@@ -93,28 +93,36 @@ void Terminal::run()
     wd->arbol=this->arbol;
     wd->exit=&exit;
     wd->terminal=this;
+    /* int rank = 0;
+     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+     if(rank==0){}
+    /*/
     pthread_create(&threads[0],NULL,Terminal::comm_exe,wd);
     pthread_create(&threads[1],NULL,Terminal::watch_dog,wd);
     pthread_join(threads[0],NULL);
-    pthread_join(threads[1],NULL);
+    pthread_join(threads[1],NULL);//*/
 }
 //leer y ejecutar comm
 int Terminal::leer_comando(comando_t *comando){
 
+    //string line;
     char* line=new char [1024];
     char split[2]=" ";
     char* token=NULL;
 
     //leer terminal
     fgets(line,1023,stdin);
-	strtok(line, "\n");
+    //std::getline(std::cin,line);
+    //gets("%s",line);
+    strtok(line, "\n");
 
     //gestion errores
         //comando no introducido
 	if (comando != NULL)
 	{
 		//coger comando
-		token = strtok(line, split);
+        token = strtok(line, split);
 		int type = get_tipo_comm(token);
 		comando->tipo = type;
 
@@ -1015,7 +1023,6 @@ void Terminal::format(comando_t* comm)
 }
 //visuales
 void Terminal::pintar_terminal() {
-
 	cout << "sergioBMPN@SI_DI:";
 	arbol->pwd_tostring();
 	cout << "$ ";

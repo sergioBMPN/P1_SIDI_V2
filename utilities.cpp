@@ -35,11 +35,11 @@ int findId(vector<string>* list,int id){
 
 void send_msg(int type, int dest)
 {
-    MPI_Send(&type,1,MPI_INT,dest,0,MPI_COMM_WORLD);
+    MPI_Send(&type,sizeof(int),MPI_BYTE,dest,0,MPI_COMM_WORLD);
 }
 int recv_msg(){
     int type;
     MPI_Status status;
-    MPI_Recv(&type, 1, MPI_INT, 0, MPI_ANY_TAG,MPI_COMM_WORLD, &status);
+    MPI_Recv(&type, sizeof(int),MPI_BYTE, 0, MPI_ANY_TAG,MPI_COMM_WORLD, &status);
     return type;
 }

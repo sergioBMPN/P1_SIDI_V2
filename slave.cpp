@@ -9,13 +9,13 @@ void Slave::write(){
     MPI_Status status;
     //recibir posicion fseek
     int f_pos=0;
-    MPI_Recv(&f_pos, 1, MPI_INT, 0, MSG_UPL,MPI_COMM_WORLD, &status);
+    MPI_Recv(&f_pos, sizeof(int), MPI_BYTE, 0, MSG_UPL,MPI_COMM_WORLD, &status);
     //recibir tam block
     int b_size=0;
-    MPI_Recv(&b_size, 1, MPI_INT, 0, MSG_UPL,MPI_COMM_WORLD, &status);
+    MPI_Recv(&b_size, sizeof(int), MPI_BYTE, 0, MSG_UPL,MPI_COMM_WORLD, &status);
     //recibir block
-    char* buff=(char*)malloc(sizeof(char)*b_size+1);
-    MPI_Recv(buff, b_size, MPI_CHAR, 0, MSG_UPL,MPI_COMM_WORLD, &status);
+    char* buff=(char*)malloc(sizeof(char)*b_size);
+    MPI_Recv(buff,sizeof(char)*b_size, MPI_BYTE, 0, MSG_UPL,MPI_COMM_WORLD, &status);
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -37,10 +37,10 @@ void Slave::read(){
     MPI_Status status;
     //recibir posicion fseek
     int f_pos=0;
-    MPI_Recv(&f_pos, 1, MPI_INT, 0, MSG_DWL,MPI_COMM_WORLD, &status);
+    MPI_Recv(&f_pos, sizeof(int), MPI_BYTE, 0, MSG_DWL,MPI_COMM_WORLD, &status);
     //recibir tam block
     int b_size=0;
-    MPI_Recv(&b_size, 1, MPI_INT, 0, MSG_DWL,MPI_COMM_WORLD, &status);
+    MPI_Recv(&b_size, sizeof(int), MPI_BYTE, 0, MSG_DWL,MPI_COMM_WORLD, &status);
 
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -53,9 +53,9 @@ void Slave::read(){
     if(disc!= NULL)
     {
         fseek(disc,f_pos,SEEK_SET);
-        char* buff=(char*)malloc(sizeof(char)*b_size+1);
+        char* buff=(char*)malloc(sizeof(char)*b_size);
         fread(buff,sizeof(char),b_size,disc);
-        MPI_Send(buff,b_size,MPI_CHAR,0,MSG_DWL,MPI_COMM_WORLD);
+        MPI_Send(buff,sizeof(char)*b_size, MPI_BYTE,0,MSG_DWL,MPI_COMM_WORLD);
         fclose(disc);
     }
 }
